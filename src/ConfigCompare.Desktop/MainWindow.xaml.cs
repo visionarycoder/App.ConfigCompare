@@ -122,6 +122,12 @@ public partial class MainWindow : Window
                 versionTextBlock.Text = $"Version: {versionString}";
             }
         }
+
+        // Set build date to today's date
+        if (this.FindName("BuildDateTextBlock") is TextBlock buildDateTextBlock)
+        {
+            buildDateTextBlock.Text = $"Build Date: {DateTime.Now:MMMM d, yyyy}";
+        }
     }
 
     // Settings Popup Event Handlers

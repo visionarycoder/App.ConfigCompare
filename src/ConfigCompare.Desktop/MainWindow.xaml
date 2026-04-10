@@ -495,51 +495,99 @@
 
                         <!-- About Tab -->
                         <TabItem Header="About" Padding="15,8">
-                            <StackPanel Orientation="Vertical" Margin="15" Background="White" VerticalAlignment="Top">
-                                <TextBlock Name="AppVersionTextBlock"
-                                           Text="Configuration Comparison Tool"
-                                           FontSize="14"
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,5" />
-                                
-                                <TextBlock Name="VersionNumberTextBlock"
-                                           Text="Version: 1.0.0"
-                                           Margin="0,0,0,15"
-                                           Foreground="#666666" />
-                                
-                                <TextBlock Text="© 2026 All Rights Reserved" 
-                                           Margin="0,0,0,20"
-                                           FontSize="11"
-                                           Foreground="#777777" />
-                                
-                                <TextBlock Text="About This Application" 
-                                           FontWeight="Bold" 
-                                           Margin="0,0,0,10" />
-                                
-                                <TextBlock Text="A powerful tool for comparing and managing Azure configuration settings across multiple environments. Features side-by-side comparison, find and replace, cross-instance synchronization, and Azure integration."
-                                           TextWrapping="Wrap"
-                                           Margin="0,0,0,15"
-                                           FontSize="11" />
-                                
-                                <TextBlock Text="Key Features:" 
-                                           FontWeight="Bold" 
-                                           Margin="0,0,0,10" />
-                                
-                                <TextBlock Text="• Side-by-side configuration comparison" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                <TextBlock Text="• Azure App Configuration integration" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                <TextBlock Text="• Find and replace values across configs" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                <TextBlock Text="• Copy settings between instances" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                <TextBlock Text="• Customizable application settings" TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Orientation="Vertical" Margin="15" Background="White">
+                                    <TextBlock Name="AppVersionTextBlock"
+                                               Text="Configuration Comparison Tool"
+                                               FontSize="16"
+                                               FontWeight="Bold"
+                                               Margin="0,0,0,5"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Name="VersionNumberTextBlock"
+                                               Text="Version: 1.0.0"
+                                               Margin="0,0,0,3"
+                                               FontSize="12"
+                                               Foreground="#666666" />
+                                    
+                                    <TextBlock Name="BuildDateTextBlock"
+                                               Text="Build Date: April 9, 2026"
+                                               Margin="0,0,0,15"
+                                               FontSize="11"
+                                               Foreground="#777777" />
+                                    
+                                    <TextBlock Text="© 2026 All Rights Reserved" 
+                                               Margin="0,0,0,20"
+                                               FontSize="10"
+                                               Foreground="#999999" />
+                                    
+                                    <TextBlock Text="About This Application" 
+                                               FontWeight="Bold" 
+                                               FontSize="12"
+                                               Margin="0,0,0,10"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Text="ConfigCompare is a powerful and intuitive application designed for comparing and managing configuration settings across multiple Azure environments. It provides developers and DevOps engineers with a seamless way to identify differences, synchronize settings, and maintain consistency across development, staging, and production configurations."
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,15"
+                                               FontSize="11"
+                                               LineHeight="16" />
+                                    
+                                    <TextBlock Text="Key Features" 
+                                               FontWeight="Bold" 
+                                               FontSize="12"
+                                               Margin="0,0,0,10"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Text="• Side-by-side configuration comparison with detailed diff view" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="• Native Azure App Configuration integration" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="• Find and replace values across configs with bulk operations" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="• Copy settings between instances with metadata preservation" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="• Customizable application settings and preferences" TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
 
-                                <TextBlock Text="Support &amp; Documentation" 
-                                           FontWeight="Bold" 
-                                           Margin="0,0,0,10" />
-                                
-                                <TextBlock Text="For more information, documentation, and support, visit the project repository or contact support."
-                                           TextWrapping="Wrap"
-                                           FontSize="11"
-                                           Foreground="#666666" />
-                            </StackPanel>
+                                    <TextBlock Text="System Requirements" 
+                                               FontWeight="Bold" 
+                                               FontSize="12"
+                                               Margin="0,0,0,10"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Text="• Windows 10 or later" TextWrapping="Wrap" Margin="0,0,0,3" FontSize="11" />
+                                    <TextBlock Text="• .NET 10.0 Runtime" TextWrapping="Wrap" Margin="0,0,0,3" FontSize="11" />
+                                    <TextBlock Text="• Azure subscription (for configuration operations)" TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
+
+                                    <TextBlock Text="Getting Started" 
+                                               FontWeight="Bold" 
+                                               FontSize="12"
+                                               Margin="0,0,0,10"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Text="1. Configure your Azure credentials using the Azure CLI or environment variables"
+                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="2. Enter Azure App Configuration endpoints in the application"
+                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="3. Compare, edit, or synchronize configurations as needed"
+                                               TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
+
+                                    <TextBlock Text="Support &amp; Resources" 
+                                               FontWeight="Bold" 
+                                               FontSize="12"
+                                               Margin="0,0,0,10"
+                                               Foreground="#1F1F1F" />
+                                    
+                                    <TextBlock Text="Documentation: Available at the project repository"
+                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="Report Issues: Submit feedback and bug reports on GitHub"
+                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
+                                    <TextBlock Text="License: MIT License - See LICENSE file for details"
+                                               TextWrapping="Wrap" Margin="0,0,0,20" FontSize="11" />
+
+                                    <TextBlock Text="Developed with ❤️ using .NET 10.0 and WPF"
+                                               TextWrapping="Wrap" 
+                                               FontSize="10"
+                                               Foreground="#999999"
+                                               TextAlignment="Center" />
+                                </StackPanel>
+                            </ScrollViewer>
                         </TabItem>
                     </TabControl>
                 </StackPanel>
