@@ -30,6 +30,28 @@ public partial class MainWindow : Window
 
     private void LoadEventHandlers()
     {
+        // Settings Icon Button (Navbar)
+        if (this.FindName("SettingsIconButton") is Button settingsIconButton)
+        {
+            settingsIconButton.Click += SettingsIconButton_Click;
+        }
+
+        // Settings Popup Buttons
+        if (this.FindName("CloseSettingsButton") is Button closeSettingsButton)
+        {
+            closeSettingsButton.Click += CloseSettingsButton_Click;
+        }
+
+        if (this.FindName("SaveSettingsPopupButton") is Button saveSettingsPopupButton)
+        {
+            saveSettingsPopupButton.Click += SaveSettingsPopupButton_Click;
+        }
+
+        if (this.FindName("ResetSettingsPopupButton") is Button resetSettingsPopupButton)
+        {
+            resetSettingsPopupButton.Click += ResetSettingsPopupButton_Click;
+        }
+
         // Comparison Tab Buttons
         if (this.FindName("CompareButton") is Button compareButton)
         {
@@ -83,6 +105,73 @@ public partial class MainWindow : Window
         if (this.FindName("ClearCopySettingsButton") is Button clearCopySettingsButton)
         {
             clearCopySettingsButton.Click += ClearCopySettingsButton_Click;
+        }
+
+        // Display version information
+        DisplayVersionInfo();
+    }
+
+    private void DisplayVersionInfo()
+    {
+        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        if (version != null)
+        {
+            var versionString = $"{version.Major}.{version.Minor}.{version.Build}";
+            if (this.FindName("VersionNumberTextBlock") is TextBlock versionTextBlock)
+            {
+                versionTextBlock.Text = $"Version: {versionString}";
+            }
+        }
+    }
+
+    // Settings Popup Event Handlers
+    private void SettingsIconButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.FindName("SettingsPopupOverlay") is Grid overlay)
+        {
+            overlay.Visibility = Visibility.Visible;
+            overlay.MouseDown += SettingsOverlay_MouseDown;
+        }
+    }
+
+    private void SettingsOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+    {
+        // Close popup when clicking outside the border
+        if (e.Source == this.FindName("SettingsPopupOverlay"))
+        {
+            CloseSettingsPopup();
+        }
+    }
+
+    private void CloseSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        CloseSettingsPopup();
+    }
+
+    private void CloseSettingsPopup()
+    {
+        if (this.FindName("SettingsPopupOverlay") is Grid overlay)
+        {
+            overlay.Visibility = Visibility.Hidden;
+            overlay.MouseDown -= SettingsOverlay_MouseDown;
+        }
+    }
+
+    private void SaveSettingsPopupButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.FindName("SettingsThemeComboBox") is ComboBox themeCombo)
+        {
+            var selectedTheme = (themeCombo.SelectedItem as ComboBoxItem)?.Content.ToString();
+            MessageBox.Show($"Settings saved!\nTheme: {selectedTheme}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+    }
+
+    private void ResetSettingsPopupButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (this.FindName("SettingsThemeComboBox") is ComboBox themeCombo)
+        {
+            themeCombo.SelectedIndex = 0;
+            MessageBox.Show("Settings reset to default.", "Reset Complete", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
