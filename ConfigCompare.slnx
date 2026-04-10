@@ -1,32 +1,18 @@
 <Solution>
   <Folder Name="/docs/" />
   <Folder Name="/src/">
-    <Project Path="src/ConfigCompare.AppConfig.Contract/ConfigCompare.AppConfig.Contract.csproj" />
-    <Project Path="src/ConfigCompare.AppConfig.Service/ConfigCompare.AppConfig.Service.csproj" />
-    <Project Path="src/ConfigCompare.AzureIdentity.Contract/ConfigCompare.AzureIdentity.Contract.csproj" />
-    <Project Path="src/ConfigCompare.AzureIdentity.Service/ConfigCompare.AzureIdentity.Service.csproj" />
-    <Project Path="src/ConfigCompare.Comparison.Contract/ConfigCompare.Comparison.Contract.csproj" />
-    <Project Path="src/ConfigCompare.Comparison.Service/ConfigCompare.Comparison.Service.csproj" />
-    <Project Path="src/ConfigCompare.KeyVault.Contract/ConfigCompare.KeyVault.Contract.csproj" />
-    <Project Path="src/ConfigCompare.KeyVault.Service/ConfigCompare.KeyVault.Service.csproj" />
-    <Project Path="src/ConfigCompare.Pim.Contract/ConfigCompare.Pim.Contract.csproj" />
-    <Project Path="src/ConfigCompare.Pim.Service/ConfigCompare.Pim.Service.csproj" />
-    <Project Path="src/ConfigCompare.ResourceGroup.Contract/ConfigCompare.ResourceGroup.Contract.csproj" />
-    <Project Path="src/ConfigCompare.ResourceGroup.Service/ConfigCompare.ResourceGroup.Service.csproj" />
-    <Project Path="src/ConfigCompare.Session.Contract/ConfigCompare.Session.Contract.csproj" />
-    <Project Path="src/ConfigCompare.Session.Service/ConfigCompare.Session.Service.csproj" />
-    <Project Path="src/ConfigCompare.Settings.Contract/ConfigCompare.Settings.Contract.csproj" />
-    <Project Path="src/ConfigCompare.Settings.Service/ConfigCompare.Settings.Service.csproj" />
+    <Project Path="src/ConfigCompare.AzureIdentity/ConfigCompare.AzureIdentity.csproj" />
+    <Project Path="src/ConfigCompare.ResourceGroup/ConfigCompare.ResourceGroup.csproj" />
+    <Project Path="src/ConfigCompare.Session/ConfigCompare.Session.csproj" />
+    <Project Path="src/ConfigCompare.Settings/ConfigCompare.Settings.csproj" />
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/integration/">
     <Project Path="tests/integration/ConfigCompare.Integration.Tests/ConfigCompare.Integration.Tests.csproj" />
   </Folder>
   <Folder Name="/tests/unit/">
-    <Project Path="tests/unit/ConfigCompare.AppConfig.Service.Tests.Unit/ConfigCompare.AppConfig.Service.Tests.Unit.csproj" />
     <Project Path="tests/unit/ConfigCompare.AzureIdentity.Service.Tests.Unit/ConfigCompare.AzureIdentity.Service.Tests.Unit.csproj" />
-    <Project Path="tests/unit/ConfigCompare.Comparison.Service.Tests.Unit/ConfigCompare.Comparison.Service.Tests.Unit.csproj" />
-    <Project Path="tests/unit/ConfigCompare.KeyVault.Service.Tests.Unit/ConfigCompare.KeyVault.Service.Tests.Unit.csproj" />
+    <Project Path="tests/unit/ConfigCompare.ResourceGroup.Service.Tests.Unit/ConfigCompare.ResourceGroup.Service.Tests.Unit.csproj" />
     <Project Path="tests/unit/ConfigCompare.Session.Service.Tests.Unit/ConfigCompare.Session.Service.Tests.Unit.csproj" />
     <Project Path="tests/unit/ConfigCompare.Settings.Service.Tests.Unit/ConfigCompare.Settings.Service.Tests.Unit.csproj" />
   </Folder>

@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using ConfigCompare.Session.Contract;
-using ConfigCompare.Session.Service;
+using ConfigCompare.Session;
+using ConfigCompare.Session.Resources;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;

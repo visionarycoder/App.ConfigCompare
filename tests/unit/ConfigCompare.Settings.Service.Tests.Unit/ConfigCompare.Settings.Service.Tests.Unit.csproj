@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../../src/ConfigCompare.Settings.Service/ConfigCompare.Settings.Service.csproj" />
+    <ProjectReference Include="../../../src/ConfigCompare.Settings/ConfigCompare.Settings.csproj" />
   </ItemGroup>
 
   <ItemGroup>

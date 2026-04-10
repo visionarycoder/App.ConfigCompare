@@ -1,6 +1,6 @@
 using System.Text.Json;
-using ConfigCompare.Settings.Contract;
-using ConfigCompare.Settings.Service;
+using ConfigCompare.Settings;
+using ConfigCompare.Settings.Resources;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;

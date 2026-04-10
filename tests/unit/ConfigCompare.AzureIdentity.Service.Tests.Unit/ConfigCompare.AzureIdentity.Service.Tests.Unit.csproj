@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\src\ConfigCompare.AzureIdentity.Service\ConfigCompare.AzureIdentity.Service.csproj" />
+    <ProjectReference Include="..\..\..\src\ConfigCompare.AzureIdentity\ConfigCompare.AzureIdentity.csproj" />
   </ItemGroup>
 
 </Project>
