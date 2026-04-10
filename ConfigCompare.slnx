@@ -2,6 +2,7 @@
   <Folder Name="/docs/" />
   <Folder Name="/src/">
     <Project Path="src/ConfigCompare.Desktop/ConfigCompare.Desktop.csproj" />
+    <Project Path="src/ConfigCompare.AppConfig/ConfigCompare.AppConfig.csproj" />
     <Project Path="src/ConfigCompare.AzureIdentity/ConfigCompare.AzureIdentity.csproj" />
     <Project Path="src/ConfigCompare.ResourceGroup/ConfigCompare.ResourceGroup.csproj" />
     <Project Path="src/ConfigCompare.Session/ConfigCompare.Session.csproj" />

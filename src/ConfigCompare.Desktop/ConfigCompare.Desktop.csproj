@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../ConfigCompare.AzureIdentity/ConfigCompare.AzureIdentity.csproj" />
+    <ProjectReference Include="../ConfigCompare.AppConfig/ConfigCompare.AppConfig.csproj" />
     <ProjectReference Include="../ConfigCompare.ResourceGroup/ConfigCompare.ResourceGroup.csproj" />
     <ProjectReference Include="../ConfigCompare.Session/ConfigCompare.Session.csproj" />
     <ProjectReference Include="../ConfigCompare.Settings/ConfigCompare.Settings.csproj" />

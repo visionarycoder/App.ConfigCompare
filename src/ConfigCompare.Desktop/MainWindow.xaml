@@ -170,6 +170,236 @@
                             </BulletDecorator.Bullet>
                             <TextBlock Text="Azure resource integration" />
                         </BulletDecorator>
+                        <BulletDecorator Margin="20,0,0,5">
+                            <BulletDecorator.Bullet>
+                                <Ellipse Width="5" Height="5" Fill="Black" />
+                            </BulletDecorator.Bullet>
+                            <TextBlock Text="Edit and commit configurations" />
+                        </BulletDecorator>
+                        <BulletDecorator Margin="20,0,0,5">
+                            <BulletDecorator.Bullet>
+                                <Ellipse Width="5" Height="5" Fill="Black" />
+                            </BulletDecorator.Bullet>
+                            <TextBlock Text="Find and replace values across configs" />
+                        </BulletDecorator>
+                        <BulletDecorator Margin="20,0,0,5">
+                            <BulletDecorator.Bullet>
+                                <Ellipse Width="5" Height="5" Fill="Black" />
+                            </BulletDecorator.Bullet>
+                            <TextBlock Text="Copy settings between instances" />
+                        </BulletDecorator>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- Edit Configuration Tab -->
+            <TabItem Header="Edit Config" Padding="15,8">
+                <Grid Background="White">
+                    <StackPanel Orientation="Vertical" Margin="20">
+                        <TextBlock Text="Edit and Commit Configuration" 
+                                   FontSize="18" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,15" />
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="App Configuration Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="EditConfigEndpointTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Configuration Key *" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="ConfigKeyTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Configuration Value *" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="ConfigValueTextBox"
+                                     MinHeight="100"
+                                     AcceptsReturn="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Configuration Label (optional)" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="ConfigLabelTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Button Name="SaveConfigButton"
+                                    Content="Save Configuration" 
+                                    Padding="20,10" 
+                                    Background="#007ACC" 
+                                    Foreground="White"
+                                    FontWeight="Bold"
+                                    Margin="0,0,10,0" />
+                            <Button Name="ClearEditConfigButton"
+                                    Content="Clear Form" 
+                                    Padding="20,10" 
+                                    Background="#6C757D" 
+                                    Foreground="White"
+                                    FontWeight="Bold" />
+                        </StackPanel>
+
+                        <TextBlock Name="EditConfigStatusTextBlock"
+                                   Margin="0,0,0,0"
+                                   TextWrapping="Wrap"
+                                   Background="#F0F0F0"
+                                   Padding="15"
+                                   MinHeight="80"
+                                   Text="Status messages will appear here..." 
+                                   Foreground="#777777" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- Find and Replace Tab -->
+            <TabItem Header="Find &amp; Replace" Padding="15,8">
+                <Grid Background="White">
+                    <StackPanel Orientation="Vertical" Margin="20">
+                        <TextBlock Text="Find and Replace Values" 
+                                   FontSize="18" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,15" />
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="App Configuration Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="FindReplaceEndpointTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <Grid ColumnDefinitions="*,*" Margin="0,0,0,15">
+                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
+                                <TextBlock Text="Find Value" FontWeight="Bold" Margin="0,0,0,5" />
+                                <TextBox Name="FindValueTextBox"
+                                         MinHeight="60"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Padding="8"
+                                         Background="#F9F9F9"
+                                         BorderBrush="#CCCCCC" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                                <TextBlock Text="Replace With" FontWeight="Bold" Margin="0,0,0,5" />
+                                <TextBox Name="ReplaceValueTextBox"
+                                         MinHeight="60"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Padding="8"
+                                         Background="#F9F9F9"
+                                         BorderBrush="#CCCCCC" />
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Button Name="ExecuteFindReplaceButton"
+                                    Content="Find &amp; Replace" 
+                                    Padding="20,10" 
+                                    Background="#FFC107" 
+                                    Foreground="Black"
+                                    FontWeight="Bold"
+                                    Margin="0,0,10,0" />
+                            <Button Name="ClearFindReplaceButton"
+                                    Content="Clear Form" 
+                                    Padding="20,10" 
+                                    Background="#6C757D" 
+                                    Foreground="White"
+                                    FontWeight="Bold" />
+                        </StackPanel>
+
+                        <TextBlock Name="FindReplaceStatusTextBlock"
+                                   Margin="0,0,0,10"
+                                   TextWrapping="Wrap"
+                                   Background="#F0F0F0"
+                                   Padding="15"
+                                   MinHeight="60"
+                                   Text="Status messages will appear here..." 
+                                   Foreground="#777777" />
+
+                        <TextBlock Text="Affected Keys:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBox Name="AffectedKeysTextBox"
+                                 MinHeight="80"
+                                 IsReadOnly="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Background="#F9F9F9"
+                                 Padding="8"
+                                 BorderBrush="#CCCCCC" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!-- Copy Settings Tab -->
+            <TabItem Header="Copy Settings" Padding="15,8">
+                <Grid Background="White">
+                    <StackPanel Orientation="Vertical" Margin="20">
+                        <TextBlock Text="Copy Settings Between Instances" 
+                                   FontSize="18" 
+                                   FontWeight="Bold"
+                                   Margin="0,0,0,15" />
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Source Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="CopySourceEndpointTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Margin="0,0,0,15">
+                            <TextBlock Text="Target Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
+                            <TextBox Name="CopyTargetEndpointTextBox"
+                                     Padding="8"
+                                     Background="#F9F9F9"
+                                     BorderBrush="#CCCCCC" />
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Button Name="ExecuteCopySettingsButton"
+                                    Content="Copy Settings" 
+                                    Padding="20,10" 
+                                    Background="#28A745" 
+                                    Foreground="White"
+                                    FontWeight="Bold"
+                                    Margin="0,0,10,0" />
+                            <Button Name="ClearCopySettingsButton"
+                                    Content="Clear Form" 
+                                    Padding="20,10" 
+                                    Background="#6C757D" 
+                                    Foreground="White"
+                                    FontWeight="Bold" />
+                        </StackPanel>
+
+                        <TextBlock Name="CopySettingsStatusTextBlock"
+                                   Margin="0,0,0,10"
+                                   TextWrapping="Wrap"
+                                   Background="#F0F0F0"
+                                   Padding="15"
+                                   MinHeight="60"
+                                   Text="Status messages will appear here..." 
+                                   Foreground="#777777" />
+
+                        <TextBlock Text="Copied Keys:" FontWeight="Bold" Margin="0,0,0,5" />
+                        <TextBox Name="CopiedKeysTextBox"
+                                 MinHeight="100"
+                                 IsReadOnly="True"
+                                 VerticalScrollBarVisibility="Auto"
+                                 Background="#F9F9F9"
+                                 Padding="8"
+                                 BorderBrush="#CCCCCC" />
                     </StackPanel>
                 </Grid>
             </TabItem>
