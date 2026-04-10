@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+    <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../ConfigCompare.AzureIdentity/ConfigCompare.AzureIdentity.csproj" />
+    <ProjectReference Include="../ConfigCompare.ResourceGroup/ConfigCompare.ResourceGroup.csproj" />
+    <ProjectReference Include="../ConfigCompare.Session/ConfigCompare.Session.csproj" />
+    <ProjectReference Include="../ConfigCompare.Settings/ConfigCompare.Settings.csproj" />
+  </ItemGroup>
+
+</Project>
