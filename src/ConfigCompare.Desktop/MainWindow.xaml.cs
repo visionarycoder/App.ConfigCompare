@@ -10,6 +10,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ConfigCompare.AppConfig;
 using ConfigCompare.AppConfig.Resources;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ConfigCompare.Desktop;
 
@@ -23,7 +24,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        appConfigService = new AppConfigService();
+        appConfigService = App.ServiceProvider.GetRequiredService<IAppConfigService>();
         LoadEventHandlers();
     }
 
