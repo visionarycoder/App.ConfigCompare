@@ -130,15 +130,30 @@ public partial class MainWindow : Window
         if (this.FindName("SettingsPopupOverlay") is Grid overlay)
         {
             overlay.Visibility = Visibility.Visible;
-            overlay.MouseDown += SettingsOverlay_MouseDown;
         }
     }
 
-    private void SettingsOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+    private void SettingsPopupOverlay_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        // Close popup when clicking outside the border
-        if (e.Source == this.FindName("SettingsPopupOverlay"))
+        // Close popup when clicking on the background overlay (not the border)
+        if (sender is Grid grid && grid.Name == "SettingsPopupOverlay")
         {
+            var hitTestResult = VisualTreeHelper.HitTest(grid, Mouse.GetPosition(grid));
+            if (hitTestResult?.VisualHit is DependencyObject hit)
+            {
+                // Check if we clicked on the border/content area
+                var parent = VisualTreeHelper.GetParent(hit);
+                while (parent != null)
+                {
+                    if (parent is Border)
+                    {
+                        // Clicked inside border, don't close
+                        return;
+                    }
+                    parent = VisualTreeHelper.GetParent(parent);
+                }
+            }
+            // Clicked outside border, close
             CloseSettingsPopup();
         }
     }
@@ -153,7 +168,6 @@ public partial class MainWindow : Window
         if (this.FindName("SettingsPopupOverlay") is Grid overlay)
         {
             overlay.Visibility = Visibility.Hidden;
-            overlay.MouseDown -= SettingsOverlay_MouseDown;
         }
     }
 

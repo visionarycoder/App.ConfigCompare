@@ -424,7 +424,8 @@
         <Grid Name="SettingsPopupOverlay" 
               Background="#80000000" 
               Visibility="Hidden"
-              ZIndex="1000">
+              ZIndex="1000"
+              MouseDown="SettingsPopupOverlay_MouseDown">
             <Border Background="White" 
                     BorderBrush="#CCCCCC" 
                     BorderThickness="1"
