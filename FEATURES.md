@@ -1,11 +1,13 @@
 # ConfigCompare Desktop Application - Feature Summary
 
 ## Overview
+
 ConfigCompare is a WPF desktop application for managing and comparing Azure App Configuration settings with enhanced productivity features.
 
 ## Features Implemented
 
 ### 1. **Configuration Comparison Tab**
+
 - **Purpose**: Side-by-side comparison of two configuration strings
 - **Capabilities**:
   - Input source and target configuration texts
@@ -15,6 +17,7 @@ ConfigCompare is a WPF desktop application for managing and comparing Azure App 
 - **Use Case**: Quickly identify configuration changes between environments
 
 ### 2. **Application Settings Tab**
+
 - **Purpose**: Customize application behavior
 - **Features**:
   - Theme selection (Light, Dark, System Default)
@@ -24,10 +27,12 @@ ConfigCompare is a WPF desktop application for managing and comparing Azure App 
   - Save and reset functionality
 
 ### 3. **About Tab**
+
 - **Purpose**: Display application information and feature overview
 - **Content**: Version, copyright, and comprehensive feature list
 
 ### 4. **Edit Configuration Tab** ✅ NEW
+
 - **Purpose**: Create and commit configurations to Azure App Configuration
 - **Features**:
   - Input App Configuration endpoint
@@ -39,6 +44,7 @@ ConfigCompare is a WPF desktop application for managing and comparing Azure App 
 - **Technology**: Uses `IAppConfigService` with Azure.Data.AppConfiguration SDK
 
 ### 5. **Find & Replace Tab** ✅ NEW
+
 - **Purpose**: Find and replace values across multiple configurations
 - **Features**:
   - Specify App Configuration endpoint
@@ -50,6 +56,7 @@ ConfigCompare is a WPF desktop application for managing and comparing Azure App 
 - **Technology**: Batch processing via AppConfigService
 
 ### 6. **Copy Settings Tab** ✅ NEW
+
 - **Purpose**: Synchronize settings between App Configuration instances
 - **Features**:
   - Select source and target App Configuration endpoints
@@ -63,7 +70,8 @@ ConfigCompare is a WPF desktop application for managing and comparing Azure App 
 ## Architecture
 
 ### Project Structure
-```
+
+```txt
 src/
 ├── ConfigCompare.Desktop/          # WPF Desktop UI (net10.0-windows)
 │   ├── MainWindow.xaml             # Main UI with 6 tabs
@@ -84,12 +92,13 @@ src/
 
 tests/
 ├── unit/                           # Unit tests (32 tests, all passing)
-└── integration/                    # Integration tests
+└── integration/                    # Integration tests (5 tests, all passing)
 ```
 
 ### Service Interfaces
 
 #### IAppConfigService
+
 ```csharp
 Task<GetConfigurationsResponse> GetConfigurationsAsync(string endpoint, CancellationToken cancellationToken)
 Task<UpdateConfigurationResponse> UpdateConfigurationAsync(string endpoint, ConfigurationItemDto configuration, CancellationToken cancellationToken)
@@ -101,8 +110,9 @@ Task<CopySettingsResponse> CopySettingsAsync(string sourceEndpoint, string targe
 ## Technical Details
 
 ### Dependencies
+
 - **WPF Framework**: Windows Presentation Foundation for desktop UI
-- **Azure SDK**: 
+- **Azure SDK**:
   - `Azure.Data.AppConfiguration` v1.4.1
   - `Azure.Identity` v1.13.2 (DefaultAzureCredential for auth)
 - **Microsoft Toolkit**:
@@ -111,32 +121,38 @@ Task<CopySettingsResponse> CopySettingsAsync(string sourceEndpoint, string targe
 - **Microsoft Extensions**: Dependency injection support
 
 ### UI Styling
+
 - Color scheme: Professional dark header (#2E2E2E) with light content area
 - Button colors: Blue (#007ACC) for primary actions, yellow (#FFC107) for find/replace, green (#28A745) for copy
 - Responsive layout with proper spacing and font sizing
 - Status messages with color coding (green for success, red for errors)
 
 ### Error Handling
+
 - Form validation with user-friendly error messages
 - Azure credential exception handling
 - Graceful failure responses with detailed error information
 - Status display for all operations
 
 ## Build Status
+
 ✅ **All Systems Operational**
+
 - Build: Successful (0 warnings, 0 errors)
-- Tests: 32/32 passing
+- Tests: 37/37 passing (32 unit + 5 integration)
 - Framework: .NET 10.0
 - IDE: Visual Studio Code / Visual Studio
 
 ## Getting Started
 
 ### Prerequisites
+
 - .NET 10.0 SDK
 - Azure subscription with App Configuration resource
 - Azure credential setup (Default Azure Credential flow)
 
 ### Build and Run
+
 ```bash
 # Build solution
 dotnet build
@@ -149,11 +165,13 @@ dotnet run --project src/ConfigCompare.Desktop/ConfigCompare.Desktop.csproj
 ```
 
 ### Configuration
+
 - Set Azure App Configuration endpoint in each tab
 - Authenticate using DefaultAzureCredential (device flow, managed identity, etc.)
 - All operations are read-your-writes consistent within Azure App Configuration
 
 ## Future Enhancements
+
 - Batch configuration file import/export
 - Configuration history and audit logging
 - Advanced filtering in find/replace

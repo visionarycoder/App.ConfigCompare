@@ -5,6 +5,7 @@ A comprehensive WPF desktop application for managing, comparing, and synchronizi
 ## 🚀 Features
 
 ### Core Features
+
 - **Configuration Comparison**: Side-by-side comparison with line-by-line difference detection
 - **Application Settings**: Customizable theme, refresh behavior, and notifications
 - **Edit & Commit**: Create and update configurations directly in Azure App Configuration
@@ -13,10 +14,11 @@ A comprehensive WPF desktop application for managing, comparing, and synchronizi
 - **Professional UI**: Tab-based navigation with intuitive user interface
 
 ### Technical Highlights
+
 - ✅ **Cloud-Native**: Direct integration with Azure App Configuration service
 - ✅ **Secure**: DefaultAzureCredential authentication support
 - ✅ **Modern Stack**: Built on .NET 10.0 with WPF and MVVM patterns
-- ✅ **Well-Tested**: 32 unit tests, 100% passing
+- ✅ **Well-Tested**: 37 total tests (32 unit + 5 integration), 100% passing
 - ✅ **Enterprise-Ready**: Comprehensive error handling and validation
 
 ## 📋 System Requirements
@@ -45,7 +47,7 @@ dotnet run --project src/ConfigCompare.Desktop/ConfigCompare.Desktop.csproj
 
 ## 📦 Project Structure
 
-```
+```txt
 src/
 ├── ConfigCompare.Desktop/       # WPF UI Application
 ├── ConfigCompare.AppConfig/     # Azure App Configuration Service
@@ -70,35 +72,41 @@ tests/
 ## 🔑 Available Operations
 
 ### 1. Comparison Tab
+
 - Compare two configuration texts
 - Get line-by-line differences
 - See total difference count
 
 ### 2. Settings Tab
+
 - Select application theme
 - Configure refresh behavior
 - Enable/disable notifications
 - Save or reset to defaults
 
 ### 3. Edit Configuration Tab
+
 - Create new configurations
 - Update existing configurations
 - Add optional labels
 - Commit directly to Azure
 
 ### 4. Find & Replace Tab
+
 - Search for values across configs
 - Replace with new values
 - View affected configuration keys
 - See replacement count
 
 ### 5. Copy Settings Tab
+
 - Sync from source to target instance
 - Preserve all metadata
 - Validation to prevent source/target confusion
 - List all copied keys
 
 ### 6. About Tab
+
 - View application version
 - See feature overview
 - Review copyright information
@@ -106,6 +114,7 @@ tests/
 ## 🔐 Authentication
 
 The application uses **DefaultAzureCredential** which automatically tries:
+
 1. Environment variables
 2. Managed Identity (if running in Azure)
 3. Visual Studio Azure credentials
@@ -117,6 +126,7 @@ No explicit configuration needed!
 ## 🏗️ Architecture
 
 ### Services
+
 - **AppConfigService**: Provides CRUD operations and advanced features on App Configuration
 - **AuthService**: Handles Azure authentication
 - **ResourceGroupService**: Discovers resource groups and services
@@ -124,6 +134,7 @@ No explicit configuration needed!
 - **SettingsService**: Manages application settings
 
 ### Data Models
+
 - ConfigurationItemDto: Represents a configuration setting
 - GetConfigurationsResponse: Response for retrieving configurations
 - UpdateConfigurationResponse: Response for create/update/delete operations
@@ -143,11 +154,12 @@ dotnet test tests/unit/ConfigCompare.AzureIdentity.Service.Tests.Unit/
 dotnet test --verbosity=detailed
 ```
 
-**Current Status**: 32/32 tests passing ✅
+**Current Status**: 37/37 tests passing ✅ (32 unit + 5 integration)
 
 ## 📚 Dependencies
 
 ### NuGet Packages
+
 - `Azure.Data.AppConfiguration` v1.4.1
 - `Azure.Identity` v1.13.2
 - `CommunityToolkit.Mvvm` v8.3.2
@@ -157,6 +169,7 @@ dotnet test --verbosity=detailed
 ## 🤝 Contributing
 
 Contributions are welcome! Please:
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -174,11 +187,12 @@ For issues, questions, or suggestions, please create an issue on GitHub.
 ## 🔄 Changelog
 
 ### v1.0.0 (Latest)
+
 - ✅ WPF desktop application with tab-based UI
 - ✅ Configuration comparison engine
 - ✅ AppConfig service with CRUD operations
 - ✅ Find and replace functionality
 - ✅ Copy settings between instances
-- ✅ 32 passing unit tests
+- ✅ 37 passing tests (32 unit + 5 integration)
 - ✅ Modern .NET 10.0 stack
 - ✅ Azure authentication integration
