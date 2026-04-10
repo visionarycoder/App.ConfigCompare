@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using ConfigCompare.AppConfig;
+using ConfigCompare.AppConfig.Resources;
 
 namespace ConfigCompare.Desktop;
 
@@ -16,9 +18,12 @@ namespace ConfigCompare.Desktop;
 /// </summary>
 public partial class MainWindow : Window
 {
+    private readonly IAppConfigService appConfigService;
+
     public MainWindow()
     {
         InitializeComponent();
+        appConfigService = new AppConfigService();
         LoadEventHandlers();
     }
 
@@ -146,7 +151,7 @@ public partial class MainWindow : Window
     }
 
     // Edit Config Tab Methods
-    private void SaveConfigButton_Click(object sender, RoutedEventArgs e)
+    private async void SaveConfigButton_Click(object sender, RoutedEventArgs e)
     {
         if (EditConfigEndpointTextBox.Text.Length == 0 || ConfigKeyTextBox.Text.Length == 0 || ConfigValueTextBox.Text.Length == 0)
         {
@@ -155,30 +160,55 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Simulate saving configuration
-        var configKey = ConfigKeyTextBox.Text;
-        var configValue = ConfigValueTextBox.Text;
-        var label = ConfigLabelTextBox.Text;
-
-        var results = new StringBuilder();
-        results.AppendLine("✓ Configuration Saved Successfully!");
-        results.AppendLine();
-        results.AppendLine($"Key: {configKey}");
-        results.AppendLine($"Value: {configValue}");
-        if (!string.IsNullOrEmpty(label))
+        try
         {
-            results.AppendLine($"Label: {label}");
+            EditConfigStatusTextBlock.Text = "⏳ Saving configuration...";
+            EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
+
+            var config = new ConfigurationItemDto
+            {
+                Key = ConfigKeyTextBox.Text,
+                Value = ConfigValueTextBox.Text,
+                Label = ConfigLabelTextBox.Text
+            };
+
+            var response = await appConfigService.UpdateConfigurationAsync(
+                EditConfigEndpointTextBox.Text,
+                config);
+
+            if (response.Success)
+            {
+                var results = new StringBuilder();
+                results.AppendLine("✓ Configuration Saved Successfully!");
+                results.AppendLine();
+                results.AppendLine($"Key: {config.Key}");
+                results.AppendLine($"Value: {config.Value}");
+                if (!string.IsNullOrEmpty(config.Label))
+                {
+                    results.AppendLine($"Label: {config.Label}");
+                }
+                results.AppendLine();
+                results.AppendLine("Committed to Azure App Configuration.");
+
+                EditConfigStatusTextBlock.Text = results.ToString();
+                EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
+
+                // Clear form
+                ConfigKeyTextBox.Clear();
+                ConfigValueTextBox.Clear();
+                ConfigLabelTextBox.Clear();
+            }
+            else
+            {
+                EditConfigStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
+                EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            }
         }
-        results.AppendLine();
-        results.AppendLine("Committed to Azure App Configuration.");
-
-        EditConfigStatusTextBlock.Text = results.ToString();
-        EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
-
-        // Clear form
-        ConfigKeyTextBox.Clear();
-        ConfigValueTextBox.Clear();
-        ConfigLabelTextBox.Clear();
+        catch (Exception ex)
+        {
+            EditConfigStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
+            EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+        }
     }
 
     private void ClearEditConfigButton_Click(object sender, RoutedEventArgs e)
@@ -192,7 +222,7 @@ public partial class MainWindow : Window
     }
 
     // Find & Replace Tab Methods
-    private void ExecuteFindReplaceButton_Click(object sender, RoutedEventArgs e)
+    private async void ExecuteFindReplaceButton_Click(object sender, RoutedEventArgs e)
     {
         if (FindReplaceEndpointTextBox.Text.Length == 0 || FindValueTextBox.Text.Length == 0 || ReplaceValueTextBox.Text.Length == 0)
         {
@@ -201,24 +231,44 @@ public partial class MainWindow : Window
             return;
         }
 
-        var findValue = FindValueTextBox.Text;
-        var replaceValue = ReplaceValueTextBox.Text;
+        try
+        {
+            FindReplaceStatusTextBlock.Text = "⏳ Processing find and replace...";
+            FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
 
-        // Simulate finding and replacing
-        var affectedKeys = new List<string> { "app.setting1", "app.setting2", "database.connection" };
-        var replacementCount = affectedKeys.Count;
+            var response = await appConfigService.FindAndReplaceAsync(
+                FindReplaceEndpointTextBox.Text,
+                FindValueTextBox.Text,
+                ReplaceValueTextBox.Text);
 
-        var results = new StringBuilder();
-        results.AppendLine($"✓ Find and Replace Completed!");
-        results.AppendLine();
-        results.AppendLine($"Find: '{findValue}'");
-        results.AppendLine($"Replace With: '{replaceValue}'");
-        results.AppendLine($"Total Replacements: {replacementCount}");
+            if (response.Success)
+            {
+                var results = new StringBuilder();
+                results.AppendLine($"✓ Find and Replace Completed!");
+                results.AppendLine();
+                results.AppendLine($"Find: '{FindValueTextBox.Text}'");
+                results.AppendLine($"Replace With: '{ReplaceValueTextBox.Text}'");
+                results.AppendLine($"Total Replacements: {response.ReplacementCount}");
 
-        FindReplaceStatusTextBlock.Text = results.ToString();
-        FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
+                FindReplaceStatusTextBlock.Text = results.ToString();
+                FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
 
-        AffectedKeysTextBox.Text = string.Join(Environment.NewLine, affectedKeys);
+                AffectedKeysTextBox.Text = response.AffectedKeys.Count > 0 
+                    ? string.Join(Environment.NewLine, response.AffectedKeys) 
+                    : "(No affected keys)";
+            }
+            else
+            {
+                FindReplaceStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
+                FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+                AffectedKeysTextBox.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            FindReplaceStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
+            FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+        }
     }
 
     private void ClearFindReplaceButton_Click(object sender, RoutedEventArgs e)
@@ -232,7 +282,7 @@ public partial class MainWindow : Window
     }
 
     // Copy Settings Tab Methods
-    private void ExecuteCopySettingsButton_Click(object sender, RoutedEventArgs e)
+    private async void ExecuteCopySettingsButton_Click(object sender, RoutedEventArgs e)
     {
         if (CopySourceEndpointTextBox.Text.Length == 0 || CopyTargetEndpointTextBox.Text.Length == 0)
         {
@@ -248,22 +298,48 @@ public partial class MainWindow : Window
             return;
         }
 
-        // Simulate copying settings
-        var copiedKeys = new List<string> { "app:setting1", "app:setting2", "app:setting3", "database:host", "database:port" };
-        var copiedCount = copiedKeys.Count;
+        try
+        {
+            CopySettingsStatusTextBlock.Text = "⏳ Copying settings...";
+            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
 
-        var results = new StringBuilder();
-        results.AppendLine($"✓ Copy Settings Completed!");
-        results.AppendLine();
-        results.AppendLine($"Total Settings Copied: {copiedCount}");
-        results.AppendLine();
-        results.AppendLine($"Source: {CopySourceEndpointTextBox.Text}");
-        results.AppendLine($"Target: {CopyTargetEndpointTextBox.Text}");
+            var response = await appConfigService.CopySettingsAsync(
+                CopySourceEndpointTextBox.Text,
+                CopyTargetEndpointTextBox.Text);
 
-        CopySettingsStatusTextBlock.Text = results.ToString();
-        CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
+            if (response.Success)
+            {
+                var results = new StringBuilder();
+                results.AppendLine($"✓ Copy Settings Completed!");
+                results.AppendLine();
+                results.AppendLine($"Total Settings Copied: {response.CopiedCount}");
+                results.AppendLine();
+                results.AppendLine($"Source: {CopySourceEndpointTextBox.Text}");
+                results.AppendLine($"Target: {CopyTargetEndpointTextBox.Text}");
 
-        CopiedKeysTextBox.Text = string.Join(Environment.NewLine, copiedKeys);
+                CopySettingsStatusTextBlock.Text = results.ToString();
+                CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
+
+                var displayKeys = response.CopiedKeys.Take(20).ToList();
+                var keysText = displayKeys.Count > 0 ? string.Join(Environment.NewLine, displayKeys) : "(No keys)";
+                if (response.CopiedKeys.Count > 20)
+                {
+                    keysText += $"\n... and {response.CopiedKeys.Count - 20} more";
+                }
+                CopiedKeysTextBox.Text = keysText;
+            }
+            else
+            {
+                CopySettingsStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
+                CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+                CopiedKeysTextBox.Clear();
+            }
+        }
+        catch (Exception ex)
+        {
+            CopySettingsStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
+            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+        }
     }
 
     private void ClearCopySettingsButton_Click(object sender, RoutedEventArgs e)
