@@ -1,4 +1,5 @@
 <Solution>
+  <Folder Name="/docs/" />
   <Folder Name="/src/">
     <Project Path="src/ConfigCompare.AppConfig.Contract/ConfigCompare.AppConfig.Contract.csproj" />
     <Project Path="src/ConfigCompare.AppConfig.Service/ConfigCompare.AppConfig.Service.csproj" />
