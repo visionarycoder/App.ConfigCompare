@@ -8,9 +8,11 @@ namespace ConfigCompare.Settings.Resources;
 /// <param name="AutoRefreshEnabled">Whether auto-refresh is enabled.</param>
 /// <param name="SavedResourceGroupNames">List of resource group names to display on startup.</param>
 /// <param name="LastActiveSubscriptionId">The last active Azure subscription ID, if any.</param>
+/// <param name="AzureConnection">Saved Azure App Configuration connection details, if any.</param>
 public record UserSettingsDto(
     AppTheme Theme,
     int AutoRefreshIntervalSeconds,
     bool AutoRefreshEnabled,
     IReadOnlyList<string> SavedResourceGroupNames,
-    string? LastActiveSubscriptionId);
+    string? LastActiveSubscriptionId,
+    AzureConnectionDto? AzureConnection = null);

@@ -4,6 +4,106 @@
              xmlns:local="clr-namespace:ConfigCompare.Desktop"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+
+        <!-- ===== Azure-themed App Icon ===== -->
+        <DrawingImage x:Key="AppIconDrawing">
+            <DrawingImage.Drawing>
+                <DrawingGroup>
+                    <!-- Azure-blue rounded rectangle background -->
+                    <GeometryDrawing Brush="#0078D4">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,32,32" RadiusX="5" RadiusY="5"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <!-- Left panel (source) -->
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="5,7,9,18" RadiusX="1" RadiusY="1"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <!-- Right panel (target) -->
+                    <GeometryDrawing Brush="White">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="18,7,9,18" RadiusX="1" RadiusY="1"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <!-- Centre compare arrows -->
+                    <GeometryDrawing Brush="#50B4FF">
+                        <GeometryDrawing.Geometry>
+                            <PathGeometry Figures="M 14,14 L 16,12 L 16,13.5 L 18,13.5 L 18,14.5 L 16,14.5 L 16,16 Z M 18,18 L 16,20 L 16,18.5 L 14,18.5 L 14,17.5 L 16,17.5 L 16,16 Z"/>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+
+        <!-- ===== Fluent Design Colours ===== -->
+        <SolidColorBrush x:Key="AzureBlueBrush"        Color="#0078D4"/>
+        <SolidColorBrush x:Key="FluentDarkNavBrush"    Color="#323130"/>
+        <SolidColorBrush x:Key="FluentNavHoverBrush"   Color="#484644"/>
+        <SolidColorBrush x:Key="FluentSurfaceBrush"    Color="#FAF9F8"/>
+        <SolidColorBrush x:Key="FluentStatusBarBrush"  Color="#EDEBE9"/>
+        <SolidColorBrush x:Key="FluentBorderBrush"     Color="#E1DFDD"/>
+        <SolidColorBrush x:Key="FluentTextPrimaryBrush"   Color="#323130"/>
+        <SolidColorBrush x:Key="FluentTextSecondaryBrush" Color="#605E5C"/>
+
+        <!-- ===== Global Button Style (Fluent-inspired) ===== -->
+        <Style x:Key="FluentButtonStyle" TargetType="Button">
+            <Setter Property="Background"    Value="Transparent"/>
+            <Setter Property="BorderBrush"   Value="{StaticResource FluentBorderBrush}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Foreground"    Value="{StaticResource FluentTextPrimaryBrush}"/>
+            <Setter Property="Padding"       Value="12,6"/>
+            <Setter Property="Cursor"        Value="Hand"/>
+            <Setter Property="FontSize"      Value="13"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#F3F2F1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#EDEBE9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ===== Primary (accent) Button Style ===== -->
+        <Style x:Key="FluentPrimaryButtonStyle" TargetType="Button" BasedOn="{StaticResource FluentButtonStyle}">
+            <Setter Property="Background"    Value="#0078D4"/>
+            <Setter Property="BorderBrush"   Value="#0078D4"/>
+            <Setter Property="Foreground"    Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#106EBE"/>
+                </Trigger>
+                <Trigger Property="IsPressed" Value="True">
+                    <Setter Property="Background" Value="#005A9E"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- ===== Subtle Button Style (used in title bar nav) ===== -->
+        <Style x:Key="FluentSubtleButtonStyle" TargetType="Button" BasedOn="{StaticResource FluentButtonStyle}">
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#E1DFDD"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
     </Application.Resources>
 </Application>
+

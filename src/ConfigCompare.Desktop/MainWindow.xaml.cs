@@ -1,15 +1,13 @@
-﻿using System.Text;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ConfigCompare.AppConfig;
 using ConfigCompare.AppConfig.Resources;
+using ConfigCompare.Settings;
+using ConfigCompare.Settings.Resources;
+using ConfigCompare.Desktop.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace ConfigCompare.Desktop;
@@ -19,223 +17,438 @@ namespace ConfigCompare.Desktop;
 /// </summary>
 public partial class MainWindow : Window
 {
-    private readonly IAppConfigService appConfigService;
+    private readonly IAppConfigService _appConfigService;
+    private readonly ISettingsService _settingsService;
+    private readonly ShellViewModel _shell = new();
+    private AzureConnectionDto? _currentConnection;
 
     public MainWindow()
     {
         InitializeComponent();
-        appConfigService = App.ServiceProvider.GetRequiredService<IAppConfigService>();
-        LoadEventHandlers();
+        _appConfigService = App.ServiceProvider.GetRequiredService<IAppConfigService>();
+        _settingsService  = App.ServiceProvider.GetRequiredService<ISettingsService>();
+
+        Loaded += MainWindow_Loaded;
+        ZoomSlider.ValueChanged += ZoomSlider_ValueChanged;
+        RegisterButtonHandlers();
     }
 
-    private void LoadEventHandlers()
+    // -------------------------------------------------------------------------
+    // Startup
+    // -------------------------------------------------------------------------
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
-        // Settings Icon Button (Navbar)
-        if (this.FindName("SettingsIconButton") is Button settingsIconButton)
-        {
-            settingsIconButton.Click += SettingsIconButton_Click;
-        }
-
-        // Settings Popup Buttons
-        if (this.FindName("CloseSettingsButton") is Button closeSettingsButton)
-        {
-            closeSettingsButton.Click += CloseSettingsButton_Click;
-        }
-
-        if (this.FindName("SaveSettingsPopupButton") is Button saveSettingsPopupButton)
-        {
-            saveSettingsPopupButton.Click += SaveSettingsPopupButton_Click;
-        }
-
-        if (this.FindName("ResetSettingsPopupButton") is Button resetSettingsPopupButton)
-        {
-            resetSettingsPopupButton.Click += ResetSettingsPopupButton_Click;
-        }
-
-        // Comparison Tab Buttons
-        if (this.FindName("CompareButton") is Button compareButton)
-        {
-            compareButton.Click += CompareButton_Click;
-        }
-
-        if (this.FindName("ClearButton") is Button clearButton)
-        {
-            clearButton.Click += ClearButton_Click;
-        }
-
-        // Settings Tab Buttons
-        if (this.FindName("SaveSettingsButton") is Button saveSettingsButton)
-        {
-            saveSettingsButton.Click += SaveSettingsButton_Click;
-        }
-
-        if (this.FindName("ResetSettingsButton") is Button resetSettingsButton)
-        {
-            resetSettingsButton.Click += ResetSettingsButton_Click;
-        }
-
-        // Edit Config Buttons
-        if (this.FindName("SaveConfigButton") is Button saveConfigButton)
-        {
-            saveConfigButton.Click += SaveConfigButton_Click;
-        }
-
-        if (this.FindName("ClearEditConfigButton") is Button clearEditConfigButton)
-        {
-            clearEditConfigButton.Click += ClearEditConfigButton_Click;
-        }
-
-        // Find & Replace Buttons
-        if (this.FindName("ExecuteFindReplaceButton") is Button executeFindReplaceButton)
-        {
-            executeFindReplaceButton.Click += ExecuteFindReplaceButton_Click;
-        }
-
-        if (this.FindName("ClearFindReplaceButton") is Button clearFindReplaceButton)
-        {
-            clearFindReplaceButton.Click += ClearFindReplaceButton_Click;
-        }
-
-        // Copy Settings Buttons
-        if (this.FindName("ExecuteCopySettingsButton") is Button executeCopySettingsButton)
-        {
-            executeCopySettingsButton.Click += ExecuteCopySettingsButton_Click;
-        }
-
-        if (this.FindName("ClearCopySettingsButton") is Button clearCopySettingsButton)
-        {
-            clearCopySettingsButton.Click += ClearCopySettingsButton_Click;
-        }
-
-        // Display version information
         DisplayVersionInfo();
+        await LoadSettingsAsync();
+    }
+
+    private async Task LoadSettingsAsync()
+    {
+        var result = await _settingsService.GetSettingsAsync();
+        if (result.IsSuccess && result.Data is { } settings)
+        {
+            _currentConnection = settings.AzureConnection;
+            UpdateConnectionStatus(_currentConnection);
+            PopulateSettingsPopupConnection(_currentConnection);
+
+            if (_currentConnection is null || string.IsNullOrWhiteSpace(_currentConnection.Endpoint))
+                ShowConnectionDialog();
+        }
+        else
+        {
+            ShowConnectionDialog();
+        }
     }
 
     private void DisplayVersionInfo()
     {
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        if (version != null)
-        {
-            var versionString = $"{version.Major}.{version.Minor}.{version.Build}";
-            if (this.FindName("VersionNumberTextBlock") is TextBlock versionTextBlock)
-            {
-                versionTextBlock.Text = $"Version: {versionString}";
-            }
-        }
+        var versionString = version is not null
+            ? $"{version.Major}.{version.Minor}.{version.Build}"
+            : "1.0.0";
 
-        // Set build date to today's date
-        if (this.FindName("BuildDateTextBlock") is TextBlock buildDateTextBlock)
-        {
-            buildDateTextBlock.Text = $"Build Date: {DateTime.Now:MMMM d, yyyy}";
-        }
+        if (VersionNumberTextBlock is not null)
+            VersionNumberTextBlock.Text = $"Version: {versionString}";
+
+        if (BuildDateTextBlock is not null)
+            BuildDateTextBlock.Text = $"Build Date: {DateTime.Now:MMMM d, yyyy}";
+
+        if (StatusVersionTextBlock is not null)
+            StatusVersionTextBlock.Text = $"v{versionString}";
+
+        if (FindName("PopupVersionNumberTextBlock") is TextBlock popupVer)
+            popupVer.Text = $"Version: {versionString}";
+
+        if (FindName("PopupBuildDateTextBlock") is TextBlock popupDate)
+            popupDate.Text = $"Build Date: {DateTime.Now:MMMM d, yyyy}";
     }
 
-    // Settings Popup Event Handlers
-    private void SettingsIconButton_Click(object sender, RoutedEventArgs e)
+    // -------------------------------------------------------------------------
+    // Button handler registration
+    // -------------------------------------------------------------------------
+
+    private void RegisterButtonHandlers()
     {
-        if (this.FindName("SettingsPopupOverlay") is Grid overlay)
-        {
-            overlay.Visibility = Visibility.Visible;
-        }
+        MinimizeButton.Click        += (_, _) => WindowState = WindowState.Minimized;
+        MaximizeRestoreButton.Click += MaximizeRestoreButton_Click;
+        CloseWindowButton.Click     += (_, _) => Close();
+
+        NavCompareButton.Click      += (_, _) => MainTabControl.SelectedIndex = 0;
+        NavEditConfigButton.Click   += (_, _) => MainTabControl.SelectedIndex = 3;
+        NavFindReplaceButton.Click  += (_, _) => MainTabControl.SelectedIndex = 4;
+        NavCopySettingsButton.Click += (_, _) => MainTabControl.SelectedIndex = 5;
+
+        SettingsIconButton.Click       += (_, _) => OpenSettingsPopup();
+        CloseSettingsButton.Click      += (_, _) => CloseSettingsPopup();
+        SaveSettingsPopupButton.Click  += SaveSettingsPopupButton_Click;
+        ResetSettingsPopupButton.Click += ResetSettingsPopupButton_Click;
+
+        SaveConnectionPopupButton.Click  += SaveConnectionPopupButton_Click;
+        ClearConnectionPopupButton.Click += ClearConnectionPopupButton_Click;
+
+        SettingsTabConnectButton.Click    += (_, _) => { CloseSettingsPopup(); ShowConnectionDialog(); };
+        SettingsTabDisconnectButton.Click += SettingsTabDisconnectButton_Click;
+        SaveSettingsButton.Click          += SaveSettingsButton_Click;
+        ResetSettingsButton.Click         += ResetSettingsButton_Click;
+
+        ConnectionDialogConnectButton.Click += ConnectionDialogConnectButton_Click;
+        ConnectionDialogSkipButton.Click    += (_, _) => HideConnectionDialog();
+
+        CompareButton.Click += CompareButton_Click;
+        ClearButton.Click   += ClearButton_Click;
+
+        SaveConfigButton.Click      += SaveConfigButton_Click;
+        ClearEditConfigButton.Click += ClearEditConfigButton_Click;
+
+        ExecuteFindReplaceButton.Click += ExecuteFindReplaceButton_Click;
+        ClearFindReplaceButton.Click   += ClearFindReplaceButton_Click;
+
+        ExecuteCopySettingsButton.Click += ExecuteCopySettingsButton_Click;
+        ClearCopySettingsButton.Click   += ClearCopySettingsButton_Click;
     }
 
-    private void SettingsPopupOverlay_MouseDown(object sender, MouseButtonEventArgs e)
+    // -------------------------------------------------------------------------
+    // Window chrome
+    // -------------------------------------------------------------------------
+
+    private void MaximizeRestoreButton_Click(object sender, RoutedEventArgs e)
     {
-        // Close popup when clicking on the background overlay (not the border)
-        if (sender is Grid grid && grid.Name == "SettingsPopupOverlay")
-        {
-            var hitTestResult = VisualTreeHelper.HitTest(grid, Mouse.GetPosition(grid));
-            if (hitTestResult?.VisualHit is DependencyObject hit)
-            {
-                // Check if we clicked on the border/content area
-                var parent = VisualTreeHelper.GetParent(hit);
-                while (parent != null)
-                {
-                    if (parent is Border)
-                    {
-                        // Clicked inside border, don't close
-                        return;
-                    }
-                    parent = VisualTreeHelper.GetParent(parent);
-                }
-            }
-            // Clicked outside border, close
-            CloseSettingsPopup();
-        }
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+        MaximizeRestoreButton.Content = WindowState == WindowState.Maximized ? "❐" : "□";
     }
 
-    private void CloseSettingsButton_Click(object sender, RoutedEventArgs e)
+    // -------------------------------------------------------------------------
+    // Settings popup
+    // -------------------------------------------------------------------------
+
+    private void OpenSettingsPopup()
     {
-        CloseSettingsPopup();
+        PopulateSettingsPopupConnection(_currentConnection);
+        SettingsPopupOverlay.Visibility = Visibility.Visible;
     }
 
     private void CloseSettingsPopup()
+        => SettingsPopupOverlay.Visibility = Visibility.Hidden;
+
+    private void SettingsPopupOverlay_MouseDown(object sender, MouseButtonEventArgs e)
     {
-        if (this.FindName("SettingsPopupOverlay") is Grid overlay)
+        if (sender is Grid grid && grid.Name == "SettingsPopupOverlay")
         {
-            overlay.Visibility = Visibility.Hidden;
+            var hit = VisualTreeHelper.HitTest(grid, Mouse.GetPosition(grid));
+            if (hit?.VisualHit is DependencyObject hitObj)
+            {
+                var parent = VisualTreeHelper.GetParent(hitObj);
+                while (parent is not null)
+                {
+                    if (parent is Border) return;
+                    parent = VisualTreeHelper.GetParent(parent);
+                }
+            }
+            CloseSettingsPopup();
         }
     }
 
     private void SaveSettingsPopupButton_Click(object sender, RoutedEventArgs e)
     {
-        if (this.FindName("SettingsThemeComboBox") is ComboBox themeCombo)
-        {
-            var selectedTheme = (themeCombo.SelectedItem as ComboBoxItem)?.Content.ToString();
-            MessageBox.Show($"Settings saved!\nTheme: {selectedTheme}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        var theme = (SettingsThemeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Light";
+        MessageBox.Show($"Settings saved!\nTheme: {theme}", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void ResetSettingsPopupButton_Click(object sender, RoutedEventArgs e)
     {
-        if (this.FindName("SettingsThemeComboBox") is ComboBox themeCombo)
-        {
-            themeCombo.SelectedIndex = 0;
-            MessageBox.Show("Settings reset to default.", "Reset Complete", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        SettingsThemeComboBox.SelectedIndex = 0;
+        MessageBox.Show("Settings reset to default.", "Reset", MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
-    // Comparison Tab Methods
+    // -------------------------------------------------------------------------
+    // Connection dialog
+    // -------------------------------------------------------------------------
+
+    private void ShowConnectionDialog()
+    {
+        PopulateConnectionDialog(_currentConnection);
+        ConnectionDialogOverlay.Visibility = Visibility.Visible;
+    }
+
+    private void HideConnectionDialog()
+        => ConnectionDialogOverlay.Visibility = Visibility.Hidden;
+
+    private void PopulateConnectionDialog(AzureConnectionDto? connection)
+    {
+        if (connection is null) return;
+        DialogConnectionEndpointTextBox.Text = connection.Endpoint;
+        DialogAuthMethodComboBox.SelectedIndex = connection.AuthMethod switch
+        {
+            AuthMethod.ServicePrincipal => 1,
+            AuthMethod.ManagedIdentity  => 2,
+            _                           => 0
+        };
+        if (!string.IsNullOrWhiteSpace(connection.TenantId))
+            DialogTenantIdTextBox.Text = connection.TenantId;
+        if (!string.IsNullOrWhiteSpace(connection.ClientId))
+            DialogClientIdTextBox.Text = connection.ClientId;
+        if (!string.IsNullOrWhiteSpace(connection.SubscriptionId))
+            DialogSubscriptionIdTextBox.Text = connection.SubscriptionId;
+    }
+
+    private void DialogAuthMethodComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (DialogServicePrincipalPanel is null) return;
+        DialogServicePrincipalPanel.Visibility =
+            DialogAuthMethodComboBox.SelectedIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async void ConnectionDialogConnectButton_Click(object sender, RoutedEventArgs e)
+    {
+        var endpoint = DialogConnectionEndpointTextBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(endpoint))
+        {
+            MessageBox.Show("Endpoint URL is required.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var authMethod = DialogAuthMethodComboBox.SelectedIndex switch
+        {
+            1 => AuthMethod.ServicePrincipal,
+            2 => AuthMethod.ManagedIdentity,
+            _ => AuthMethod.DefaultAzureCredential
+        };
+
+        if (authMethod == AuthMethod.ServicePrincipal &&
+            (string.IsNullOrWhiteSpace(DialogTenantIdTextBox.Text) ||
+             string.IsNullOrWhiteSpace(DialogClientIdTextBox.Text)))
+        {
+            MessageBox.Show("Tenant ID and Client ID are required for Service Principal.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var connection = new AzureConnectionDto(
+            endpoint,
+            authMethod,
+            string.IsNullOrWhiteSpace(DialogTenantIdTextBox.Text)      ? null : DialogTenantIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(DialogSubscriptionIdTextBox.Text) ? null : DialogSubscriptionIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(DialogClientIdTextBox.Text)       ? null : DialogClientIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(DialogClientSecretBox.Password)   ? null : DialogClientSecretBox.Password);
+
+        await PersistConnectionAsync(connection);
+        HideConnectionDialog();
+    }
+
+    // -------------------------------------------------------------------------
+    // Connection popup (settings popup > Connection tab)
+    // -------------------------------------------------------------------------
+
+    private void PopulateSettingsPopupConnection(AzureConnectionDto? connection)
+    {
+        if (connection is null) return;
+        PopupConnectionEndpointTextBox.Text = connection.Endpoint;
+        PopupAuthMethodComboBox.SelectedIndex = connection.AuthMethod switch
+        {
+            AuthMethod.ServicePrincipal => 1,
+            AuthMethod.ManagedIdentity  => 2,
+            _                           => 0
+        };
+        if (!string.IsNullOrWhiteSpace(connection.TenantId))
+            PopupTenantIdTextBox.Text = connection.TenantId;
+        if (!string.IsNullOrWhiteSpace(connection.ClientId))
+            PopupClientIdTextBox.Text = connection.ClientId;
+        if (!string.IsNullOrWhiteSpace(connection.SubscriptionId))
+            PopupSubscriptionIdTextBox.Text = connection.SubscriptionId;
+    }
+
+    private void PopupAuthMethodComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (PopupServicePrincipalPanel is null) return;
+        PopupServicePrincipalPanel.Visibility =
+            PopupAuthMethodComboBox.SelectedIndex == 1 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private async void SaveConnectionPopupButton_Click(object sender, RoutedEventArgs e)
+    {
+        var endpoint = PopupConnectionEndpointTextBox.Text.Trim();
+        if (string.IsNullOrWhiteSpace(endpoint))
+        {
+            MessageBox.Show("Endpoint URL is required.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var authMethod = PopupAuthMethodComboBox.SelectedIndex switch
+        {
+            1 => AuthMethod.ServicePrincipal,
+            2 => AuthMethod.ManagedIdentity,
+            _ => AuthMethod.DefaultAzureCredential
+        };
+
+        if (authMethod == AuthMethod.ServicePrincipal &&
+            (string.IsNullOrWhiteSpace(PopupTenantIdTextBox.Text) ||
+             string.IsNullOrWhiteSpace(PopupClientIdTextBox.Text)))
+        {
+            MessageBox.Show("Tenant ID and Client ID are required for Service Principal.", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        var connection = new AzureConnectionDto(
+            endpoint,
+            authMethod,
+            string.IsNullOrWhiteSpace(PopupTenantIdTextBox.Text)       ? null : PopupTenantIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(PopupSubscriptionIdTextBox.Text)  ? null : PopupSubscriptionIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(PopupClientIdTextBox.Text)        ? null : PopupClientIdTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(PopupClientSecretBox.Password)    ? null : PopupClientSecretBox.Password);
+
+        await PersistConnectionAsync(connection);
+        CloseSettingsPopup();
+        MessageBox.Show("Connection saved successfully.", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void ClearConnectionPopupButton_Click(object sender, RoutedEventArgs e)
+    {
+        PopupConnectionEndpointTextBox.Clear();
+        PopupTenantIdTextBox.Clear();
+        PopupClientIdTextBox.Clear();
+        PopupClientSecretBox.Clear();
+        PopupSubscriptionIdTextBox.Clear();
+        PopupAuthMethodComboBox.SelectedIndex = 0;
+    }
+
+    // -------------------------------------------------------------------------
+    // Settings tab (inline)
+    // -------------------------------------------------------------------------
+
+    private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var theme = (ThemeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Light";
+        MessageBox.Show($"Settings saved!\nTheme: {theme}", "Saved", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void ResetSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        ThemeComboBox.SelectedIndex = 0;
+        MessageBox.Show("Settings reset to default.", "Reset", MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private async void SettingsTabDisconnectButton_Click(object sender, RoutedEventArgs e)
+    {
+        var confirm = MessageBox.Show(
+            "Disconnect from Azure App Configuration?",
+            "Disconnect", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (confirm != MessageBoxResult.Yes) return;
+        await PersistConnectionAsync(null);
+    }
+
+    // -------------------------------------------------------------------------
+    // Connection persistence helpers
+    // -------------------------------------------------------------------------
+
+    private async Task PersistConnectionAsync(AzureConnectionDto? connection)
+    {
+        var existing = await _settingsService.GetSettingsAsync();
+        var current = existing.IsSuccess && existing.Data is not null
+            ? existing.Data
+            : SettingsService.DefaultSettings;
+
+        var updated = current with { AzureConnection = connection };
+        await _settingsService.SaveSettingsAsync(updated);
+
+        _currentConnection = connection;
+        UpdateConnectionStatus(connection);
+        PopulateSettingsPopupConnection(connection);
+    }
+
+    private void UpdateConnectionStatus(AzureConnectionDto? connection)
+    {
+        _shell.UpdateConnection(connection);
+
+        ConnectionStatusTextBlock.Text = _shell.ConnectionDisplay;
+        SettingsTabConnectionTextBlock.Text = _shell.ConnectionDisplay;
+
+        ConnectionStatusDot.Foreground = connection is not null
+            ? new SolidColorBrush(Color.FromRgb(0x13, 0xa1, 0x0e))
+            : new SolidColorBrush(Color.FromRgb(0xcc, 0x44, 0x44));
+    }
+
+    // -------------------------------------------------------------------------
+    // Status bar
+    // -------------------------------------------------------------------------
+
+    private void ZoomSlider_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (ZoomLevelTextBlock is null) return;
+        _shell.ZoomLevel = ZoomSlider.Value;
+        ZoomLevelTextBlock.Text = $"{ZoomSlider.Value:0}%";
+    }
+
+    public void UpdateConfigCount(int count)
+    {
+        _shell.ConfigSettingsCount = count;
+        if (ConfigCountTextBlock is not null)
+            ConfigCountTextBlock.Text = count > 0 ? $"  |  Settings: {count}" : string.Empty;
+    }
+
+    // -------------------------------------------------------------------------
+    // Comparison tab
+    // -------------------------------------------------------------------------
+
     private void CompareButton_Click(object sender, RoutedEventArgs e)
     {
         if (SourceConfigTextBox.Text.Length == 0 || TargetConfigTextBox.Text.Length == 0)
         {
             ComparisonResultsTextBlock.Text = "Please enter configuration in both Source and Target fields.";
-            ComparisonResultsTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            ComparisonResultsTextBlock.Foreground = Brushes.Red;
             return;
         }
 
-        var sourceLines = SourceConfigTextBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-        var targetLines = TargetConfigTextBox.Text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        var sourceLines = SourceConfigTextBox.Text.Split(Environment.NewLine);
+        var targetLines = TargetConfigTextBox.Text.Split(Environment.NewLine);
 
-        var results = new StringBuilder();
-        results.AppendLine("=== Comparison Results ===");
-        results.AppendLine($"Source Configuration Lines: {sourceLines.Length}");
-        results.AppendLine($"Target Configuration Lines: {targetLines.Length}");
-        results.AppendLine();
+        var sb = new StringBuilder();
+        sb.AppendLine("=== Comparison Results ===");
+        sb.AppendLine($"Source lines: {sourceLines.Length}");
+        sb.AppendLine($"Target lines: {targetLines.Length}");
+        sb.AppendLine();
 
-        var maxLines = Math.Max(sourceLines.Length, targetLines.Length);
-        int differenceCount = 0;
-
+        int diffCount = 0;
+        int maxLines = Math.Max(sourceLines.Length, targetLines.Length);
         for (int i = 0; i < maxLines; i++)
         {
-            var sourceLine = i < sourceLines.Length ? sourceLines[i] : "[MISSING]";
-            var targetLine = i < targetLines.Length ? targetLines[i] : "[MISSING]";
-
-            if (sourceLine != targetLine)
+            var src = i < sourceLines.Length ? sourceLines[i] : "[MISSING]";
+            var tgt = i < targetLines.Length ? targetLines[i] : "[MISSING]";
+            if (src != tgt)
             {
-                differenceCount++;
-                results.AppendLine($"Line {i + 1}: DIFFERENT");
-                results.AppendLine($"  Source: {sourceLine}");
-                results.AppendLine($"  Target: {targetLine}");
+                diffCount++;
+                sb.AppendLine($"Line {i + 1}: DIFFERENT");
+                sb.AppendLine($"  Source: {src}");
+                sb.AppendLine($"  Target: {tgt}");
             }
         }
+        sb.AppendLine();
+        sb.AppendLine($"Total Differences: {diffCount}");
 
-        results.AppendLine();
-        results.AppendLine($"Total Differences: {differenceCount}");
-
-        ComparisonResultsTextBlock.Text = results.ToString();
-        ComparisonResultsTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Black);
+        ComparisonResultsTextBlock.Text = sb.ToString();
+        ComparisonResultsTextBlock.Foreground = new SolidColorBrush(Colors.Black);
+        UpdateConfigCount(sourceLines.Length);
     }
 
     private void ClearButton_Click(object sender, RoutedEventArgs e)
@@ -243,81 +456,56 @@ public partial class MainWindow : Window
         SourceConfigTextBox.Clear();
         TargetConfigTextBox.Clear();
         ComparisonResultsTextBlock.Text = "Comparison results will appear here...";
-        ComparisonResultsTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(119, 119, 119));
+        ComparisonResultsTextBlock.Foreground = new SolidColorBrush(Color.FromRgb(119, 119, 119));
+        UpdateConfigCount(0);
     }
 
-    // Settings Tab Methods
-    private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
-    {
-        var selectedTheme = (ThemeComboBox.SelectedItem as ComboBoxItem)?.Content.ToString();
-        MessageBox.Show($"Settings saved!\nTheme: {selectedTheme}", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
+    // -------------------------------------------------------------------------
+    // Edit Config tab
+    // -------------------------------------------------------------------------
 
-    private void ResetSettingsButton_Click(object sender, RoutedEventArgs e)
-    {
-        ThemeComboBox.SelectedIndex = 0;
-        var systemCheckBoxes = FindVisualChildren<CheckBox>(this).Where(c => c.Name.Contains("Checkbox")).ToList();
-        MessageBox.Show("Settings reset to default.", "Reset Complete", MessageBoxButton.OK, MessageBoxImage.Information);
-    }
-
-    // Edit Config Tab Methods
     private async void SaveConfigButton_Click(object sender, RoutedEventArgs e)
     {
-        if (EditConfigEndpointTextBox.Text.Length == 0 || ConfigKeyTextBox.Text.Length == 0 || ConfigValueTextBox.Text.Length == 0)
+        if (EditConfigEndpointTextBox.Text.Length == 0 ||
+            ConfigKeyTextBox.Text.Length == 0 ||
+            ConfigValueTextBox.Text.Length == 0)
         {
-            EditConfigStatusTextBlock.Text = "❌ Endpoint, Key, and Value are all required.";
-            EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(EditConfigStatusTextBlock, "Endpoint, Key, and Value are all required.", StatusColor.Error);
             return;
         }
 
         try
         {
-            EditConfigStatusTextBlock.Text = "⏳ Saving configuration...";
-            EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
-
+            SetStatus(EditConfigStatusTextBlock, "Saving configuration...", StatusColor.Info);
             var config = new ConfigurationItemDto
             {
-                Key = ConfigKeyTextBox.Text,
+                Key   = ConfigKeyTextBox.Text,
                 Value = ConfigValueTextBox.Text,
                 Label = ConfigLabelTextBox.Text
             };
 
-            var response = await appConfigService.UpdateConfigurationAsync(
-                EditConfigEndpointTextBox.Text,
-                config);
-
+            var response = await _appConfigService.UpdateConfigurationAsync(EditConfigEndpointTextBox.Text, config);
             if (response.Success)
             {
-                var results = new StringBuilder();
-                results.AppendLine("✓ Configuration Saved Successfully!");
-                results.AppendLine();
-                results.AppendLine($"Key: {config.Key}");
-                results.AppendLine($"Value: {config.Value}");
-                if (!string.IsNullOrEmpty(config.Label))
-                {
-                    results.AppendLine($"Label: {config.Label}");
-                }
-                results.AppendLine();
-                results.AppendLine("Committed to Azure App Configuration.");
-
-                EditConfigStatusTextBlock.Text = results.ToString();
-                EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
-
-                // Clear form
+                var sb = new StringBuilder();
+                sb.AppendLine("Configuration Saved Successfully!");
+                sb.AppendLine();
+                sb.AppendLine($"Key: {config.Key}");
+                sb.AppendLine($"Value: {config.Value}");
+                if (!string.IsNullOrEmpty(config.Label)) sb.AppendLine($"Label: {config.Label}");
+                SetStatus(EditConfigStatusTextBlock, sb.ToString(), StatusColor.Success);
                 ConfigKeyTextBox.Clear();
                 ConfigValueTextBox.Clear();
                 ConfigLabelTextBox.Clear();
             }
             else
             {
-                EditConfigStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
-                EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+                SetStatus(EditConfigStatusTextBlock, $"Error: {response.ErrorMessage}", StatusColor.Error);
             }
         }
         catch (Exception ex)
         {
-            EditConfigStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
-            EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(EditConfigStatusTextBlock, $"Exception: {ex.Message}", StatusColor.Error);
         }
     }
 
@@ -327,57 +515,53 @@ public partial class MainWindow : Window
         ConfigKeyTextBox.Clear();
         ConfigValueTextBox.Clear();
         ConfigLabelTextBox.Clear();
-        EditConfigStatusTextBlock.Text = "Status messages will appear here...";
-        EditConfigStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(119, 119, 119));
+        SetStatus(EditConfigStatusTextBlock, "Status messages will appear here...", StatusColor.Neutral);
     }
 
-    // Find & Replace Tab Methods
+    // -------------------------------------------------------------------------
+    // Find and Replace tab
+    // -------------------------------------------------------------------------
+
     private async void ExecuteFindReplaceButton_Click(object sender, RoutedEventArgs e)
     {
-        if (FindReplaceEndpointTextBox.Text.Length == 0 || FindValueTextBox.Text.Length == 0 || ReplaceValueTextBox.Text.Length == 0)
+        if (FindReplaceEndpointTextBox.Text.Length == 0 ||
+            FindValueTextBox.Text.Length == 0 ||
+            ReplaceValueTextBox.Text.Length == 0)
         {
-            FindReplaceStatusTextBlock.Text = "❌ Endpoint, Find Value, and Replace Value are all required.";
-            FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(FindReplaceStatusTextBlock, "Endpoint, Find Value, and Replace Value are all required.", StatusColor.Error);
             return;
         }
 
         try
         {
-            FindReplaceStatusTextBlock.Text = "⏳ Processing find and replace...";
-            FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
-
-            var response = await appConfigService.FindAndReplaceAsync(
+            SetStatus(FindReplaceStatusTextBlock, "Processing find and replace...", StatusColor.Info);
+            var response = await _appConfigService.FindAndReplaceAsync(
                 FindReplaceEndpointTextBox.Text,
                 FindValueTextBox.Text,
                 ReplaceValueTextBox.Text);
 
             if (response.Success)
             {
-                var results = new StringBuilder();
-                results.AppendLine($"✓ Find and Replace Completed!");
-                results.AppendLine();
-                results.AppendLine($"Find: '{FindValueTextBox.Text}'");
-                results.AppendLine($"Replace With: '{ReplaceValueTextBox.Text}'");
-                results.AppendLine($"Total Replacements: {response.ReplacementCount}");
-
-                FindReplaceStatusTextBlock.Text = results.ToString();
-                FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
-
-                AffectedKeysTextBox.Text = response.AffectedKeys.Count > 0 
-                    ? string.Join(Environment.NewLine, response.AffectedKeys) 
+                var sb = new StringBuilder();
+                sb.AppendLine("Find and Replace Completed!");
+                sb.AppendLine();
+                sb.AppendLine($"Find: '{FindValueTextBox.Text}'");
+                sb.AppendLine($"Replace With: '{ReplaceValueTextBox.Text}'");
+                sb.AppendLine($"Total Replacements: {response.ReplacementCount}");
+                SetStatus(FindReplaceStatusTextBlock, sb.ToString(), StatusColor.Success);
+                AffectedKeysTextBox.Text = response.AffectedKeys.Count > 0
+                    ? string.Join(Environment.NewLine, response.AffectedKeys)
                     : "(No affected keys)";
             }
             else
             {
-                FindReplaceStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
-                FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+                SetStatus(FindReplaceStatusTextBlock, $"Error: {response.ErrorMessage}", StatusColor.Error);
                 AffectedKeysTextBox.Clear();
             }
         }
         catch (Exception ex)
         {
-            FindReplaceStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
-            FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(FindReplaceStatusTextBlock, $"Exception: {ex.Message}", StatusColor.Error);
         }
     }
 
@@ -386,69 +570,63 @@ public partial class MainWindow : Window
         FindReplaceEndpointTextBox.Clear();
         FindValueTextBox.Clear();
         ReplaceValueTextBox.Clear();
-        FindReplaceStatusTextBlock.Text = "Status messages will appear here...";
-        FindReplaceStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(119, 119, 119));
         AffectedKeysTextBox.Clear();
+        SetStatus(FindReplaceStatusTextBlock, "Status messages will appear here...", StatusColor.Neutral);
     }
 
-    // Copy Settings Tab Methods
+    // -------------------------------------------------------------------------
+    // Copy Settings tab
+    // -------------------------------------------------------------------------
+
     private async void ExecuteCopySettingsButton_Click(object sender, RoutedEventArgs e)
     {
         if (CopySourceEndpointTextBox.Text.Length == 0 || CopyTargetEndpointTextBox.Text.Length == 0)
         {
-            CopySettingsStatusTextBlock.Text = "❌ Both Source and Target endpoints are required.";
-            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(CopySettingsStatusTextBlock, "Both Source and Target endpoints are required.", StatusColor.Error);
             return;
         }
-
         if (CopySourceEndpointTextBox.Text == CopyTargetEndpointTextBox.Text)
         {
-            CopySettingsStatusTextBlock.Text = "❌ Source and Target endpoints must be different.";
-            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(CopySettingsStatusTextBlock, "Source and Target endpoints must be different.", StatusColor.Error);
             return;
         }
 
         try
         {
-            CopySettingsStatusTextBlock.Text = "⏳ Copying settings...";
-            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Blue);
-
-            var response = await appConfigService.CopySettingsAsync(
+            SetStatus(CopySettingsStatusTextBlock, "Copying settings...", StatusColor.Info);
+            var response = await _appConfigService.CopySettingsAsync(
                 CopySourceEndpointTextBox.Text,
                 CopyTargetEndpointTextBox.Text);
 
             if (response.Success)
             {
-                var results = new StringBuilder();
-                results.AppendLine($"✓ Copy Settings Completed!");
-                results.AppendLine();
-                results.AppendLine($"Total Settings Copied: {response.CopiedCount}");
-                results.AppendLine();
-                results.AppendLine($"Source: {CopySourceEndpointTextBox.Text}");
-                results.AppendLine($"Target: {CopyTargetEndpointTextBox.Text}");
-
-                CopySettingsStatusTextBlock.Text = results.ToString();
-                CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Green);
+                var sb = new StringBuilder();
+                sb.AppendLine("Copy Settings Completed!");
+                sb.AppendLine();
+                sb.AppendLine($"Total Settings Copied: {response.CopiedCount}");
+                sb.AppendLine($"Source: {CopySourceEndpointTextBox.Text}");
+                sb.AppendLine($"Target: {CopyTargetEndpointTextBox.Text}");
+                SetStatus(CopySettingsStatusTextBlock, sb.ToString(), StatusColor.Success);
 
                 var displayKeys = response.CopiedKeys.Take(20).ToList();
-                var keysText = displayKeys.Count > 0 ? string.Join(Environment.NewLine, displayKeys) : "(No keys)";
+                var keysText = displayKeys.Count > 0
+                    ? string.Join(Environment.NewLine, displayKeys)
+                    : "(No keys)";
                 if (response.CopiedKeys.Count > 20)
-                {
                     keysText += $"\n... and {response.CopiedKeys.Count - 20} more";
-                }
                 CopiedKeysTextBox.Text = keysText;
+
+                UpdateConfigCount(response.CopiedCount);
             }
             else
             {
-                CopySettingsStatusTextBlock.Text = $"❌ Error: {response.ErrorMessage}";
-                CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+                SetStatus(CopySettingsStatusTextBlock, $"Error: {response.ErrorMessage}", StatusColor.Error);
                 CopiedKeysTextBox.Clear();
             }
         }
         catch (Exception ex)
         {
-            CopySettingsStatusTextBlock.Text = $"❌ Exception: {ex.Message}";
-            CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.Red);
+            SetStatus(CopySettingsStatusTextBlock, $"Exception: {ex.Message}", StatusColor.Error);
         }
     }
 
@@ -456,29 +634,25 @@ public partial class MainWindow : Window
     {
         CopySourceEndpointTextBox.Clear();
         CopyTargetEndpointTextBox.Clear();
-        CopySettingsStatusTextBlock.Text = "Status messages will appear here...";
-        CopySettingsStatusTextBlock.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(119, 119, 119));
         CopiedKeysTextBox.Clear();
+        SetStatus(CopySettingsStatusTextBlock, "Status messages will appear here...", StatusColor.Neutral);
     }
 
-    // Helper method to find visual children
-    private IEnumerable<T> FindVisualChildren<T>(DependencyObject obj) where T : DependencyObject
-    {
-        if (obj is not null)
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
-            {
-                var child = VisualTreeHelper.GetChild(obj, i);
-                if (child is T typedChild)
-                {
-                    yield return typedChild;
-                }
+    // -------------------------------------------------------------------------
+    // Status helper
+    // -------------------------------------------------------------------------
 
-                foreach (var childOfChild in FindVisualChildren<T>(child))
-                {
-                    yield return childOfChild;
-                }
-            }
-        }
+    private enum StatusColor { Success, Error, Info, Neutral }
+
+    private static void SetStatus(TextBlock tb, string message, StatusColor color)
+    {
+        tb.Text = message;
+        tb.Foreground = color switch
+        {
+            StatusColor.Success => Brushes.Green,
+            StatusColor.Error   => Brushes.Red,
+            StatusColor.Info    => Brushes.Blue,
+            _                   => new SolidColorBrush(Color.FromRgb(119, 119, 119))
+        };
     }
 }

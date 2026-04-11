@@ -1,591 +1,928 @@
-﻿<Window x:Class="ConfigCompare.Desktop.MainWindow"
+<Window x:Class="ConfigCompare.Desktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ConfigCompare.Desktop"
         mc:Ignorable="d"
-        Title="Configuration Comparison Tool" 
-        Height="600" 
-        Width="1000"
+        Title="ConfigCompare - Azure App Configuration"
+        Height="720"
+        Width="1120"
+        MinHeight="520"
+        MinWidth="820"
         WindowStartupLocation="CenterScreen"
-        Background="#F5F5F5">
-    <DockPanel>
-        <!-- Header/Navigation Bar -->
-        <StackPanel DockPanel.Dock="Left" 
-                    Background="#2E2E2E" 
-                    Width="60" 
-                    Orientation="Vertical">
-            <TextBlock Text="ConfigCompare" 
-                       Foreground="White" 
-                       FontSize="11" 
-                       FontWeight="Bold" 
-                       VerticalAlignment="Top"
-                       HorizontalAlignment="Center"
-                       TextWrapping="Wrap"
-                       TextAlignment="Center"
-                       Margin="5,15,5,0" 
-                       Height="40" />
-            <StackPanel VerticalAlignment="Bottom" Margin="0,0,0,10">
-                <Button Name="SettingsIconButton"
-                        Content="⚙"
-                        FontSize="24"
-                        Width="45"
-                        Height="45"
-                        Background="#404040"
-                        Foreground="White"
-                        BorderThickness="0"
-                        HorizontalAlignment="Center"
-                        Cursor="Hand" />
+        WindowStyle="None"
+        ResizeMode="CanResize"
+        Background="{StaticResource FluentSurfaceBrush}">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="48"
+                      ResizeBorderThickness="5"
+                      UseAeroCaptionButtons="False"
+                      GlassFrameThickness="-1"/>
+    </WindowChrome.WindowChrome>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="24"/>
+        </Grid.RowDefinitions>
+
+        <!-- TITLE BAR -->
+        <Grid Grid.Row="0" Background="{StaticResource AzureBlueBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                <Image Source="{StaticResource AppIconDrawing}"
+                       Width="24" Height="24" Margin="0,0,10,0"
+                       VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                <TextBlock Text="ConfigCompare"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="White" VerticalAlignment="Center"
+                           Margin="0,0,16,0"/>
             </StackPanel>
-        </StackPanel>
 
-        <!-- Tab Control -->
-        <TabControl DockPanel.Dock="Top"
-                    Background="White"
-                    Margin="10">
-            <!-- Comparison Tab -->
-            <TabItem Header="Comparison" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20">
-                        <TextBlock Text="Configuration Comparison" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15" />
-                        
-                        <Grid ColumnDefinitions="*,*" Margin="0,0,0,15">
-                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock Text="Source Configuration" 
-                                           FontWeight="Bold" 
-                                           Margin="0,0,0,10" />
-                                <TextBox Name="SourceConfigTextBox"
-                                         MinHeight="200"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         Background="#F9F9F9"
-                                         BorderBrush="#CCCCCC" />
+            <!-- Search box -->
+            <Border Grid.Column="2" Background="#1A5FA3" CornerRadius="4"
+                    VerticalAlignment="Center" Padding="10,0" Height="30">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="&#x1F50D;"
+                               Foreground="#AACCEE" VerticalAlignment="Center"
+                               Margin="0,0,6,0" FontSize="11"/>
+                    <TextBox Grid.Column="1" Name="GlobalSearchTextBox"
+                             Background="Transparent" BorderThickness="0"
+                             Foreground="White" CaretBrush="White"
+                             FontSize="12" VerticalAlignment="Center"
+                             WindowChrome.IsHitTestVisibleInChrome="True"/>
+                    <TextBlock Grid.Column="1" Text="Search settings..."
+                               Foreground="#88AACCDD" FontSize="12"
+                               VerticalAlignment="Center" IsHitTestVisible="False">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Text, ElementName=GlobalSearchTextBox}" Value="">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Grid>
+            </Border>
+
+            <!-- Window controls -->
+            <StackPanel Grid.Column="4" Orientation="Horizontal"
+                        VerticalAlignment="Top"
+                        WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Name="MinimizeButton" Content="&#x2212;"
+                        FontSize="14" Width="46" Height="48"
+                        Foreground="White" BorderThickness="0" Cursor="Hand"
+                        ToolTip="Minimize">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#1AFFFFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Name="MaximizeRestoreButton" Content="&#x25A1;"
+                        FontSize="12" Width="46" Height="48"
+                        Foreground="White" BorderThickness="0" Cursor="Hand"
+                        ToolTip="Maximize">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#1AFFFFFF"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button Name="CloseWindowButton" Content="&#x2715;"
+                        FontSize="12" Width="46" Height="48"
+                        Foreground="White" BorderThickness="0" Cursor="Hand"
+                        ToolTip="Close">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}"
+                                                Width="{TemplateBinding Width}" Height="{TemplateBinding Height}">
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#C42B1C"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- CONTENT ROW -->
+        <DockPanel Grid.Row="1">
+
+            <!-- Left sidebar -->
+            <DockPanel DockPanel.Dock="Left" Background="{StaticResource FluentDarkNavBrush}" Width="56" LastChildFill="True">
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,0,0,6">
+                    <Button Name="SettingsIconButton" ToolTip="Settings" Width="56" Height="52"
+                            BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" Width="56" Height="52">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <ContentPresenter HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Settings" FontSize="8" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource FluentNavHoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="&#x2699;" Foreground="White" FontSize="20"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel>
+                    <Button Name="NavCompareButton" ToolTip="Comparison" Width="56" Height="52" BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" Width="56" Height="52">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <ContentPresenter HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Compare" FontSize="8" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource FluentNavHoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="&#x21C4;" Foreground="White" FontSize="18"/>
+                    </Button>
+                    <Button Name="NavEditConfigButton" ToolTip="Edit Configuration" Width="56" Height="52" BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" Width="56" Height="52">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <ContentPresenter HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Edit" FontSize="8" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource FluentNavHoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="&#x270E;" Foreground="White" FontSize="18"/>
+                    </Button>
+                    <Button Name="NavFindReplaceButton" ToolTip="Find and Replace" Width="56" Height="52" BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" Width="56" Height="52">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <ContentPresenter HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Find" FontSize="8" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource FluentNavHoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="&#x2315;" Foreground="White" FontSize="18"/>
+                    </Button>
+                    <Button Name="NavCopySettingsButton" ToolTip="Copy Settings" Width="56" Height="52" BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="Transparent"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" Width="56" Height="52">
+                                                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                                    <ContentPresenter HorizontalAlignment="Center"/>
+                                                    <TextBlock Text="Copy" FontSize="8" Foreground="#AAAAAA" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="{StaticResource FluentNavHoverBrush}"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                        <TextBlock Text="&#x2398;" Foreground="White" FontSize="18"/>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
+
+            <!-- Tab Control -->
+            <TabControl Name="MainTabControl"
+                        Background="{StaticResource FluentSurfaceBrush}"
+                        BorderBrush="{StaticResource FluentBorderBrush}"
+                        BorderThickness="0,1,0,0">
+                <TabControl.Resources>
+                    <Style TargetType="TabItem">
+                        <Setter Property="Padding"         Value="16,10"/>
+                        <Setter Property="FontSize"        Value="13"/>
+                        <Setter Property="Background"      Value="Transparent"/>
+                        <Setter Property="Foreground"      Value="{StaticResource FluentTextSecondaryBrush}"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="TabItem">
+                                    <Border x:Name="TabBorder"
+                                            Background="{TemplateBinding Background}"
+                                            BorderThickness="0,0,0,2"
+                                            BorderBrush="Transparent"
+                                            Padding="{TemplateBinding Padding}">
+                                        <ContentPresenter ContentSource="Header"
+                                                          HorizontalAlignment="Center"
+                                                          VerticalAlignment="Center"/>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter TargetName="TabBorder" Property="BorderBrush" Value="{StaticResource AzureBlueBrush}"/>
+                                            <Setter Property="Foreground" Value="{StaticResource AzureBlueBrush}"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                        </Trigger>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter TargetName="TabBorder" Property="Background" Value="#F3F2F1"/>
+                                        </Trigger>
+                                    </ControlTemplate.Triggers>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </TabControl.Resources>
+
+                <!-- Comparison Tab -->
+                <TabItem Header="Comparison">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <TextBlock Text="Configuration Comparison"
+                                       FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,16"/>
+                            <Grid Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Source Configuration"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,8"/>
+                                    <TextBox Name="SourceConfigTextBox"
+                                             MinHeight="200" AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto"
+                                             FontFamily="Consolas" FontSize="12"
+                                             Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"
+                                             Padding="10"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Target Configuration"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,8"/>
+                                    <TextBox Name="TargetConfigTextBox"
+                                             MinHeight="200" AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto"
+                                             FontFamily="Consolas" FontSize="12"
+                                             Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"
+                                             Padding="10"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button Name="CompareButton" Content="Compare"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        Padding="20,8" Margin="0,0,8,0"/>
+                                <Button Name="ClearButton" Content="Clear"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="20,8"/>
                             </StackPanel>
+                            <Border Background="White"
+                                    BorderBrush="{StaticResource FluentBorderBrush}"
+                                    BorderThickness="1" CornerRadius="4"
+                                    Padding="16" MinHeight="100">
+                                <TextBlock Name="ComparisonResultsTextBlock"
+                                           TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                                           Text="Comparison results will appear here..."
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Text="Target Configuration" 
-                                           FontWeight="Bold" 
-                                           Margin="0,0,0,10" />
-                                <TextBox Name="TargetConfigTextBox"
-                                         MinHeight="200"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         Background="#F9F9F9"
-                                         BorderBrush="#CCCCCC" />
+                <!-- Settings Tab -->
+                <TabItem Header="Settings">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <TextBlock Text="Application Settings"
+                                       FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,20"/>
+                            <TextBlock Text="Appearance" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,12"/>
+                            <StackPanel Margin="0,0,0,20">
+                                <TextBlock Text="Theme" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,8"/>
+                                <ComboBox Name="ThemeComboBox" SelectedIndex="0"
+                                          MinWidth="200" MaxWidth="300" HorizontalAlignment="Left">
+                                    <ComboBoxItem>Light</ComboBoxItem>
+                                    <ComboBoxItem>Dark</ComboBoxItem>
+                                    <ComboBoxItem>System Default</ComboBoxItem>
+                                </ComboBox>
                             </StackPanel>
-                        </Grid>
-
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Button Name="CompareButton"
-                                    Content="Compare" 
-                                    Padding="20,10" 
-                                    Background="#007ACC" 
-                                    Foreground="White"
-                                    FontWeight="Bold"
-                                    Margin="0,0,10,0" />
-                            <Button Name="ClearButton"
-                                    Content="Clear" 
-                                    Padding="20,10" 
-                                    Background="#6C757D" 
-                                    Foreground="White"
-                                    FontWeight="Bold" />
+                            <StackPanel Margin="0,0,0,20">
+                                <CheckBox Content="Auto-refresh on changes"  Margin="0,0,0,8" IsChecked="True"/>
+                                <CheckBox Content="Show detailed differences" Margin="0,0,0,8" IsChecked="True"/>
+                                <CheckBox Content="Enable notifications"     IsChecked="False"/>
+                            </StackPanel>
+                            <Separator Margin="0,0,0,20"/>
+                            <TextBlock Text="Azure Connection" FontSize="14" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,12"/>
+                            <TextBlock Text="Current connection:"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <TextBlock Name="SettingsTabConnectionTextBlock"
+                                       Text="Not connected" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,16"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                <Button Name="SettingsTabConnectButton"
+                                        Content="Configure Connection..."
+                                        Style="{StaticResource FluentButtonStyle}"
+                                        Padding="16,8" Margin="0,0,8,0"
+                                        BorderBrush="{StaticResource AzureBlueBrush}"
+                                        Foreground="{StaticResource AzureBlueBrush}"/>
+                                <Button Name="SettingsTabDisconnectButton"
+                                        Content="Disconnect"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="16,8"/>
+                            </StackPanel>
+                            <Separator Margin="0,0,0,20"/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Name="SaveSettingsButton"
+                                        Content="Save Settings"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        Padding="20,8" Margin="0,0,8,0"/>
+                                <Button Name="ResetSettingsButton"
+                                        Content="Reset to Default"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="20,8"/>
+                            </StackPanel>
                         </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <TextBlock Name="ComparisonResultsTextBlock"
-                                   Margin="0,20,0,0"
-                                   TextWrapping="Wrap"
-                                   Background="#F0F0F0"
-                                   Padding="15"
-                                   MinHeight="100"
-                                   Text="Comparison results will appear here..." 
-                                   Foreground="#777777" />
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-
-            <!-- Settings Tab -->
-            <TabItem Header="Settings" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20">
-                        <TextBlock Text="Application Settings" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15" />
-                        
-                        <StackPanel Margin="0,0,0,20">
-                            <TextBlock Text="Theme" FontWeight="Bold" Margin="0,0,0,10" />
-                            <ComboBox Name="ThemeComboBox"
-                                      SelectedIndex="0"
-                                      MinWidth="200">
-                                <ComboBoxItem>Light</ComboBoxItem>
-                                <ComboBoxItem>Dark</ComboBoxItem>
-                                <ComboBoxItem>System Default</ComboBoxItem>
-                            </ComboBox>
+                <!-- About Tab -->
+                <TabItem Header="About">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                <Image Source="{StaticResource AppIconDrawing}"
+                                       Width="48" Height="48" Margin="0,0,16,0"
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock Text="ConfigCompare"
+                                               FontSize="22" FontWeight="Bold"
+                                               Foreground="{StaticResource FluentTextPrimaryBrush}"/>
+                                    <TextBlock Name="VersionNumberTextBlock" Text="Version: 1.0.0"
+                                               FontSize="12"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,4,0,0"/>
+                                    <TextBlock Name="BuildDateTextBlock" Text="Build Date: -"
+                                               FontSize="11"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <TextBlock Text="(C) 2026 All Rights Reserved"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       FontSize="11" Margin="0,0,0,20"/>
+                            <TextBlock Text="Azure App Configuration management tool for comparing, editing, and synchronising settings across environments."
+                                       TextWrapping="Wrap"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       FontSize="12" Margin="0,0,0,20"/>
+                            <TextBlock Text="Key Features" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,10"/>
+                            <TextBlock Text="* Side-by-side configuration comparison" TextWrapping="Wrap" Margin="0,0,0,4" FontSize="12"/>
+                            <TextBlock Text="* Native Azure App Configuration integration" TextWrapping="Wrap" Margin="0,0,0,4" FontSize="12"/>
+                            <TextBlock Text="* Find and replace values across configs" TextWrapping="Wrap" Margin="0,0,0,4" FontSize="12"/>
+                            <TextBlock Text="* Copy settings between instances" TextWrapping="Wrap" Margin="0,0,0,4" FontSize="12"/>
+                            <TextBlock Text="* Fluent Design shell inspired by Microsoft 365" TextWrapping="Wrap" Margin="0,0,0,20" FontSize="12"/>
                         </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <StackPanel Margin="0,0,0,20">
-                            <CheckBox Content="Auto-refresh on changes" Margin="0,0,0,10" IsChecked="True" />
-                            <CheckBox Content="Show detailed differences" Margin="0,0,0,10" IsChecked="True" />
-                            <CheckBox Content="Enable notifications" IsChecked="False" />
+                <!-- Edit Config Tab -->
+                <TabItem Header="Edit Config">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <TextBlock Text="Edit and Commit Configuration"
+                                       FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,20"/>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="App Configuration Endpoint" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="EditConfigEndpointTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="Configuration Key *" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="ConfigKeyTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="Configuration Value *" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="ConfigValueTextBox"
+                                         MinHeight="100" AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         FontFamily="Consolas" FontSize="12"
+                                         Padding="10,8" Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="Configuration Label (optional)" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="ConfigLabelTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button Name="SaveConfigButton" Content="Save Configuration"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        Padding="20,8" Margin="0,0,8,0"/>
+                                <Button Name="ClearEditConfigButton" Content="Clear Form"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="20,8"/>
+                            </StackPanel>
+                            <Border Background="White"
+                                    BorderBrush="{StaticResource FluentBorderBrush}"
+                                    BorderThickness="1" CornerRadius="4"
+                                    Padding="16" MinHeight="80"
+                                    MaxWidth="600" HorizontalAlignment="Left">
+                                <TextBlock Name="EditConfigStatusTextBlock"
+                                           TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                                           Text="Status messages will appear here..."
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                            </Border>
                         </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <StackPanel Orientation="Horizontal">
-                            <Button Name="SaveSettingsButton"
-                                    Content="Save Settings" 
-                                    Padding="20,10" 
-                                    Background="#28A745" 
-                                    Foreground="White"
-                                    FontWeight="Bold"
-                                    Margin="0,0,10,0" />
-                            <Button Name="ResetSettingsButton"
-                                    Content="Reset to Default" 
-                                    Padding="20,10" 
-                                    Background="#6C757D" 
-                                    Foreground="White"
-                                    FontWeight="Bold" />
-                        </StackPanel>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-
-            <!-- About Tab -->
-            <TabItem Header="About" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20" VerticalAlignment="Top">
-                        <TextBlock Text="About Configuration Comparison Tool" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,20" />
-                        
-                        <TextBlock Text="Version: 1.0.0" Margin="0,0,0,10" />
-                        <TextBlock Text="© 2026 All Rights Reserved" Margin="0,0,0,20" />
-                        
-                        <TextBlock Text="Features:" 
-                                   FontWeight="Bold" 
-                                   Margin="0,0,0,10" />
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Side-by-side configuration comparison" />
-                        </BulletDecorator>
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Customizable application settings" />
-                        </BulletDecorator>
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Azure resource integration" />
-                        </BulletDecorator>
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Edit and commit configurations" />
-                        </BulletDecorator>
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Find and replace values across configs" />
-                        </BulletDecorator>
-                        <BulletDecorator Margin="20,0,0,5">
-                            <BulletDecorator.Bullet>
-                                <Ellipse Width="5" Height="5" Fill="Black" />
-                            </BulletDecorator.Bullet>
-                            <TextBlock Text="Copy settings between instances" />
-                        </BulletDecorator>
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-
-            <!-- Edit Configuration Tab -->
-            <TabItem Header="Edit Config" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20">
-                        <TextBlock Text="Edit and Commit Configuration" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15" />
-
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="App Configuration Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="EditConfigEndpointTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Configuration Key *" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="ConfigKeyTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Configuration Value *" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="ConfigValueTextBox"
-                                     MinHeight="100"
-                                     AcceptsReturn="True"
+                <!-- Find and Replace Tab -->
+                <TabItem Header="Find and Replace">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <TextBlock Text="Find and Replace Values"
+                                       FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,20"/>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="App Configuration Endpoint" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="FindReplaceEndpointTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
+                            </StackPanel>
+                            <Grid Margin="0,0,0,14" MaxWidth="600" HorizontalAlignment="Left">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="Find Value" FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Name="FindValueTextBox" MinHeight="60"
+                                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                             Padding="10,8" Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="Replace With" FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Name="ReplaceValueTextBox" MinHeight="60"
+                                             AcceptsReturn="True" VerticalScrollBarVisibility="Auto"
+                                             Padding="10,8" Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"/>
+                                </StackPanel>
+                            </Grid>
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button Name="ExecuteFindReplaceButton" Content="Find and Replace"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        Padding="20,8" Margin="0,0,8,0"/>
+                                <Button Name="ClearFindReplaceButton" Content="Clear Form"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="20,8"/>
+                            </StackPanel>
+                            <Border Background="White"
+                                    BorderBrush="{StaticResource FluentBorderBrush}"
+                                    BorderThickness="1" CornerRadius="4"
+                                    Padding="16" MinHeight="60"
+                                    MaxWidth="600" HorizontalAlignment="Left"
+                                    Margin="0,0,0,16">
+                                <TextBlock Name="FindReplaceStatusTextBlock"
+                                           TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                                           Text="Status messages will appear here..."
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                            </Border>
+                            <TextBlock Text="Affected Keys:" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <TextBox Name="AffectedKeysTextBox"
+                                     MinHeight="80" IsReadOnly="True"
                                      VerticalScrollBarVisibility="Auto"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
+                                     FontFamily="Consolas" FontSize="12"
+                                     Background="White" Padding="10,8"
+                                     BorderBrush="{StaticResource FluentBorderBrush}"
+                                     MaxWidth="600" HorizontalAlignment="Left"/>
                         </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Configuration Label (optional)" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="ConfigLabelTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                            <Button Name="SaveConfigButton"
-                                    Content="Save Configuration" 
-                                    Padding="20,10" 
-                                    Background="#007ACC" 
-                                    Foreground="White"
-                                    FontWeight="Bold"
-                                    Margin="0,0,10,0" />
-                            <Button Name="ClearEditConfigButton"
-                                    Content="Clear Form" 
-                                    Padding="20,10" 
-                                    Background="#6C757D" 
-                                    Foreground="White"
-                                    FontWeight="Bold" />
-                        </StackPanel>
-
-                        <TextBlock Name="EditConfigStatusTextBlock"
-                                   Margin="0,0,0,0"
-                                   TextWrapping="Wrap"
-                                   Background="#F0F0F0"
-                                   Padding="15"
-                                   MinHeight="80"
-                                   Text="Status messages will appear here..." 
-                                   Foreground="#777777" />
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-
-            <!-- Find and Replace Tab -->
-            <TabItem Header="Find &amp; Replace" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20">
-                        <TextBlock Text="Find and Replace Values" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15" />
-
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="App Configuration Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="FindReplaceEndpointTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
-
-                        <Grid ColumnDefinitions="*,*" Margin="0,0,0,15">
-                            <StackPanel Grid.Column="0" Margin="0,0,10,0">
-                                <TextBlock Text="Find Value" FontWeight="Bold" Margin="0,0,0,5" />
-                                <TextBox Name="FindValueTextBox"
-                                         MinHeight="60"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         Padding="8"
-                                         Background="#F9F9F9"
-                                         BorderBrush="#CCCCCC" />
+                <!-- Copy Settings Tab -->
+                <TabItem Header="Copy Settings">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Orientation="Vertical" Margin="24,20">
+                            <TextBlock Text="Copy Settings Between Instances"
+                                       FontSize="20" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextPrimaryBrush}"
+                                       Margin="0,0,0,20"/>
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="Source Endpoint" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="CopySourceEndpointTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
                             </StackPanel>
-
-                            <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                                <TextBlock Text="Replace With" FontWeight="Bold" Margin="0,0,0,5" />
-                                <TextBox Name="ReplaceValueTextBox"
-                                         MinHeight="60"
-                                         AcceptsReturn="True"
-                                         VerticalScrollBarVisibility="Auto"
-                                         Padding="8"
-                                         Background="#F9F9F9"
-                                         BorderBrush="#CCCCCC" />
+                            <StackPanel Margin="0,0,0,14">
+                                <TextBlock Text="Target Endpoint" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="CopyTargetEndpointTextBox" Padding="10,8"
+                                         Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         MaxWidth="600" HorizontalAlignment="Left"/>
                             </StackPanel>
-                        </Grid>
-
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                            <Button Name="ExecuteFindReplaceButton"
-                                    Content="Find &amp; Replace" 
-                                    Padding="20,10" 
-                                    Background="#FFC107" 
-                                    Foreground="Black"
-                                    FontWeight="Bold"
-                                    Margin="0,0,10,0" />
-                            <Button Name="ClearFindReplaceButton"
-                                    Content="Clear Form" 
-                                    Padding="20,10" 
-                                    Background="#6C757D" 
-                                    Foreground="White"
-                                    FontWeight="Bold" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                                <Button Name="ExecuteCopySettingsButton" Content="Copy Settings"
+                                        Style="{StaticResource FluentPrimaryButtonStyle}"
+                                        Padding="20,8" Margin="0,0,8,0"/>
+                                <Button Name="ClearCopySettingsButton" Content="Clear Form"
+                                        Style="{StaticResource FluentSubtleButtonStyle}"
+                                        Padding="20,8"/>
+                            </StackPanel>
+                            <Border Background="White"
+                                    BorderBrush="{StaticResource FluentBorderBrush}"
+                                    BorderThickness="1" CornerRadius="4"
+                                    Padding="16" MinHeight="60"
+                                    MaxWidth="600" HorizontalAlignment="Left"
+                                    Margin="0,0,0,16">
+                                <TextBlock Name="CopySettingsStatusTextBlock"
+                                           TextWrapping="Wrap" FontFamily="Consolas" FontSize="12"
+                                           Text="Status messages will appear here..."
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                            </Border>
+                            <TextBlock Text="Copied Keys:" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <TextBox Name="CopiedKeysTextBox"
+                                     MinHeight="100" IsReadOnly="True"
+                                     VerticalScrollBarVisibility="Auto"
+                                     FontFamily="Consolas" FontSize="12"
+                                     Background="White" Padding="10,8"
+                                     BorderBrush="{StaticResource FluentBorderBrush}"
+                                     MaxWidth="600" HorizontalAlignment="Left"/>
                         </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
 
-                        <TextBlock Name="FindReplaceStatusTextBlock"
-                                   Margin="0,0,0,10"
-                                   TextWrapping="Wrap"
-                                   Background="#F0F0F0"
-                                   Padding="15"
-                                   MinHeight="60"
-                                   Text="Status messages will appear here..." 
-                                   Foreground="#777777" />
+            </TabControl>
+        </DockPanel>
 
-                        <TextBlock Text="Affected Keys:" FontWeight="Bold" Margin="0,0,0,5" />
-                        <TextBox Name="AffectedKeysTextBox"
-                                 MinHeight="80"
-                                 IsReadOnly="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Background="#F9F9F9"
-                                 Padding="8"
-                                 BorderBrush="#CCCCCC" />
-                    </StackPanel>
-                </Grid>
-            </TabItem>
+        <!-- STATUS BAR -->
+        <Grid Grid.Row="2" Background="{StaticResource FluentStatusBarBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="1"/>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="8"/>
+            </Grid.ColumnDefinitions>
 
-            <!-- Copy Settings Tab -->
-            <TabItem Header="Copy Settings" Padding="15,8">
-                <Grid Background="White">
-                    <StackPanel Orientation="Vertical" Margin="20">
-                        <TextBlock Text="Copy Settings Between Instances" 
-                                   FontSize="18" 
-                                   FontWeight="Bold"
-                                   Margin="0,0,0,15" />
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                <TextBlock Name="ConnectionStatusDot" Text="&#x25CF;" FontSize="8"
+                           Foreground="#CC4444" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                <TextBlock Name="ConnectionStatusTextBlock" Text="Not connected"
+                           FontSize="11" Foreground="{StaticResource FluentTextSecondaryBrush}"
+                           VerticalAlignment="Center"/>
+                <TextBlock Name="ConfigCountTextBlock" Text=""
+                           FontSize="11" Foreground="{StaticResource FluentTextSecondaryBrush}"
+                           VerticalAlignment="Center" Margin="16,0,0,0"/>
+            </StackPanel>
 
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Source Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="CopySourceEndpointTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
+            <TextBlock Grid.Column="1" Name="StatusVersionTextBlock" Text="v1.0.0"
+                       FontSize="11" Foreground="{StaticResource FluentTextSecondaryBrush}"
+                       VerticalAlignment="Center" Margin="0,0,8,0"/>
 
-                        <StackPanel Margin="0,0,0,15">
-                            <TextBlock Text="Target Endpoint" FontWeight="Bold" Margin="0,0,0,5" />
-                            <TextBox Name="CopyTargetEndpointTextBox"
-                                     Padding="8"
-                                     Background="#F9F9F9"
-                                     BorderBrush="#CCCCCC" />
-                        </StackPanel>
+            <Rectangle Grid.Column="2" Fill="{StaticResource FluentBorderBrush}" Width="1" Margin="0,3"/>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                            <Button Name="ExecuteCopySettingsButton"
-                                    Content="Copy Settings" 
-                                    Padding="20,10" 
-                                    Background="#28A745" 
-                                    Foreground="White"
-                                    FontWeight="Bold"
-                                    Margin="0,0,10,0" />
-                            <Button Name="ClearCopySettingsButton"
-                                    Content="Clear Form" 
-                                    Padding="20,10" 
-                                    Background="#6C757D" 
-                                    Foreground="White"
-                                    FontWeight="Bold" />
-                        </StackPanel>
+            <TextBlock Grid.Column="3" Name="ZoomLevelTextBlock" Text="100%"
+                       FontSize="11" Foreground="{StaticResource FluentTextSecondaryBrush}"
+                       VerticalAlignment="Center" Margin="8,0,4,0"
+                       MinWidth="36" TextAlignment="Right"/>
 
-                        <TextBlock Name="CopySettingsStatusTextBlock"
-                                   Margin="0,0,0,10"
-                                   TextWrapping="Wrap"
-                                   Background="#F0F0F0"
-                                   Padding="15"
-                                   MinHeight="60"
-                                   Text="Status messages will appear here..." 
-                                   Foreground="#777777" />
+            <Rectangle Grid.Column="4" Fill="{StaticResource FluentBorderBrush}" Width="1" Margin="0,3"/>
 
-                        <TextBlock Text="Copied Keys:" FontWeight="Bold" Margin="0,0,0,5" />
-                        <TextBox Name="CopiedKeysTextBox"
-                                 MinHeight="100"
-                                 IsReadOnly="True"
-                                 VerticalScrollBarVisibility="Auto"
-                                 Background="#F9F9F9"
-                                 Padding="8"
-                                 BorderBrush="#CCCCCC" />
-                    </StackPanel>
-                </Grid>
-            </TabItem>
-        </TabControl>
+            <Slider Grid.Column="5" Name="ZoomSlider"
+                    Minimum="50" Maximum="200" Value="100"
+                    VerticalAlignment="Center" Margin="4,0,0,0"
+                    TickFrequency="25" IsSnapToTickEnabled="False"/>
+        </Grid>
 
-        <!-- Settings Popup Overlay -->
-        <Grid Name="SettingsPopupOverlay" 
-              Background="#80000000" 
+        <!-- SETTINGS POPUP OVERLAY -->
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              Name="SettingsPopupOverlay"
+              Background="#80000000"
               Visibility="Hidden"
-              ZIndex="1000"
+              Panel.ZIndex="100"
               MouseDown="SettingsPopupOverlay_MouseDown">
-            <Border Background="White" 
-                    BorderBrush="#CCCCCC" 
-                    BorderThickness="1"
-                    CornerRadius="8"
-                    Margin="50"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    MaxWidth="500">
-                <StackPanel Orientation="Vertical" Margin="30">
-                    <!-- Close Button -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,0,20">
-                        <Button Name="CloseSettingsButton"
-                                Content="✕"
-                                FontSize="16"
-                                Width="30"
-                                Height="30"
-                                Background="#F0F0F0"
-                                Foreground="Black"
-                                BorderThickness="0"
-                                Cursor="Hand" />
-                    </StackPanel>
-
-                    <!-- Settings/About Content -->
-                    <TabControl Name="SettingsTabControl" Margin="0,0,0,20">
-                        <!-- Settings Tab -->
-                        <TabItem Header="Settings" Padding="15,8">
-                            <StackPanel Orientation="Vertical" Margin="15" Background="White">
-                                <TextBlock Text="Application Preferences" 
-                                           FontSize="14" 
-                                           FontWeight="Bold"
-                                           Margin="0,0,0,15" />
-                                
-                                <StackPanel Margin="0,0,0,15">
-                                    <TextBlock Text="Theme" FontWeight="Bold" Margin="0,0,0,8" />
-                                    <ComboBox Name="SettingsThemeComboBox"
-                                              SelectedIndex="0"
-                                              MinWidth="200">
-                                        <ComboBoxItem>Light</ComboBoxItem>
-                                        <ComboBoxItem>Dark</ComboBoxItem>
-                                        <ComboBoxItem>System Default</ComboBoxItem>
-                                    </ComboBox>
-                                </StackPanel>
-
-                                <StackPanel Margin="0,0,0,15">
-                                    <CheckBox Content="Auto-refresh on changes" Margin="0,0,0,8" IsChecked="True" />
-                                    <CheckBox Content="Show detailed differences" Margin="0,0,0,8" IsChecked="True" />
-                                    <CheckBox Content="Enable notifications" IsChecked="False" />
-                                </StackPanel>
-
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Name="SaveSettingsPopupButton"
-                                            Content="Save" 
-                                            Padding="15,8" 
-                                            Background="#28A745" 
-                                            Foreground="White"
-                                            FontWeight="Bold"
-                                            Margin="0,0,10,0" />
-                                    <Button Name="ResetSettingsPopupButton"
-                                            Content="Reset" 
-                                            Padding="15,8" 
-                                            Background="#6C757D" 
-                                            Foreground="White"
-                                            FontWeight="Bold" />
+            <Border Background="White"
+                    BorderBrush="{StaticResource FluentBorderBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="520" MaxWidth="580" Margin="40">
+                <StackPanel>
+                    <Grid Background="{StaticResource AzureBlueBrush}" Height="52">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="Settings"
+                                   FontSize="16" FontWeight="SemiBold"
+                                   Foreground="White" VerticalAlignment="Center"
+                                   Margin="24,0,0,0"/>
+                        <Button Grid.Column="1" Name="CloseSettingsButton"
+                                Content="X" FontSize="12"
+                                Width="36" Height="36"
+                                Background="Transparent" Foreground="White"
+                                BorderThickness="0" Cursor="Hand" Margin="0,0,8,0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        CornerRadius="4"
+                                                        Width="{TemplateBinding Width}"
+                                                        Height="{TemplateBinding Height}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#C42B1C"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
+                    <TabControl Name="SettingsTabControl" BorderThickness="0" Background="White"
+                                Margin="0,0,0,24">
+                        <!-- Appearance tab -->
+                        <TabItem Header="Appearance" Padding="16,10">
+                            <StackPanel Orientation="Vertical" Margin="24,16">
+                                <TextBlock Text="Theme" FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,8"/>
+                                <ComboBox Name="SettingsThemeComboBox" SelectedIndex="0"
+                                          MinWidth="200" MaxWidth="260" HorizontalAlignment="Left">
+                                    <ComboBoxItem>Light</ComboBoxItem>
+                                    <ComboBoxItem>Dark</ComboBoxItem>
+                                    <ComboBoxItem>System Default</ComboBoxItem>
+                                </ComboBox>
+                                <Separator Margin="0,16"/>
+                                <CheckBox Content="Auto-refresh on changes"  Margin="0,0,0,8" IsChecked="True"/>
+                                <CheckBox Content="Show detailed differences" Margin="0,0,0,8" IsChecked="True"/>
+                                <CheckBox Content="Enable notifications"     IsChecked="False"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Name="SaveSettingsPopupButton" Content="Save"
+                                            Style="{StaticResource FluentPrimaryButtonStyle}"
+                                            Padding="20,8" Margin="0,0,8,0"/>
+                                    <Button Name="ResetSettingsPopupButton" Content="Reset"
+                                            Style="{StaticResource FluentSubtleButtonStyle}"
+                                            Padding="20,8"/>
                                 </StackPanel>
                             </StackPanel>
                         </TabItem>
-
-                        <!-- About Tab -->
-                        <TabItem Header="About" Padding="15,8">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <StackPanel Orientation="Vertical" Margin="15" Background="White">
+                        <!-- Connection tab -->
+                        <TabItem Header="Connection" Padding="16,10">
+                            <StackPanel Orientation="Vertical" Margin="24,16">
+                                <TextBlock Text="Azure App Configuration"
+                                           FontWeight="SemiBold" FontSize="14"
+                                           Margin="0,0,0,16"/>
+                                <TextBlock Text="Endpoint URL"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="PopupConnectionEndpointTextBox"
+                                         Padding="10,8" Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         FontSize="12" Margin="0,0,0,16"/>
+                                <TextBlock Text="Authentication Method"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <ComboBox Name="PopupAuthMethodComboBox"
+                                          SelectedIndex="0" HorizontalAlignment="Left"
+                                          MinWidth="260" Margin="0,0,0,16"
+                                          SelectionChanged="PopupAuthMethodComboBox_SelectionChanged">
+                                    <ComboBoxItem Tag="DefaultAzureCredential">Default Azure Credential</ComboBoxItem>
+                                    <ComboBoxItem Tag="ServicePrincipal">Service Principal</ComboBoxItem>
+                                    <ComboBoxItem Tag="ManagedIdentity">Managed Identity</ComboBoxItem>
+                                </ComboBox>
+                                <StackPanel Name="PopupServicePrincipalPanel" Visibility="Collapsed">
+                                    <TextBlock Text="Tenant ID"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Name="PopupTenantIdTextBox"
+                                             Padding="10,8" Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"
+                                             FontSize="12" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Client ID"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <TextBox Name="PopupClientIdTextBox"
+                                             Padding="10,8" Background="White"
+                                             BorderBrush="{StaticResource FluentBorderBrush}"
+                                             FontSize="12" Margin="0,0,0,12"/>
+                                    <TextBlock Text="Client Secret"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                               Margin="0,0,0,6"/>
+                                    <PasswordBox Name="PopupClientSecretBox"
+                                                 Padding="10,8" Background="White"
+                                                 BorderBrush="{StaticResource FluentBorderBrush}"
+                                                 FontSize="12" Margin="0,0,0,12"/>
+                                </StackPanel>
+                                <TextBlock Text="Subscription ID (optional)"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                           Margin="0,0,0,6"/>
+                                <TextBox Name="PopupSubscriptionIdTextBox"
+                                         Padding="10,8" Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         FontSize="12" Margin="0,0,0,20"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Name="SaveConnectionPopupButton" Content="Save Connection"
+                                            Style="{StaticResource FluentPrimaryButtonStyle}"
+                                            Padding="16,8" Margin="0,0,8,0"/>
+                                    <Button Name="ClearConnectionPopupButton" Content="Clear"
+                                            Style="{StaticResource FluentSubtleButtonStyle}"
+                                            Padding="16,8"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </TabItem>
+                        <!-- About tab -->
+                        <TabItem Header="About" Padding="16,10">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="360">
+                                <StackPanel Orientation="Vertical" Margin="24,16">
                                     <TextBlock Name="AppVersionTextBlock"
-                                               Text="Configuration Comparison Tool"
-                                               FontSize="16"
-                                               FontWeight="Bold"
-                                               Margin="0,0,0,5"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Name="VersionNumberTextBlock"
+                                               Text="ConfigCompare"
+                                               FontSize="16" FontWeight="Bold"
+                                               Margin="0,0,0,4"
+                                               Foreground="{StaticResource FluentTextPrimaryBrush}"/>
+                                    <TextBlock Name="PopupVersionNumberTextBlock"
                                                Text="Version: 1.0.0"
-                                               Margin="0,0,0,3"
-                                               FontSize="12"
-                                               Foreground="#666666" />
-                                    
-                                    <TextBlock Name="BuildDateTextBlock"
-                                               Text="Build Date: April 9, 2026"
-                                               Margin="0,0,0,15"
-                                               FontSize="11"
-                                               Foreground="#777777" />
-                                    
-                                    <TextBlock Text="© 2026 All Rights Reserved" 
-                                               Margin="0,0,0,20"
-                                               FontSize="10"
-                                               Foreground="#999999" />
-                                    
-                                    <TextBlock Text="About This Application" 
-                                               FontWeight="Bold" 
-                                               FontSize="12"
-                                               Margin="0,0,0,10"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Text="ConfigCompare is a powerful and intuitive application designed for comparing and managing configuration settings across multiple Azure environments. It provides developers and DevOps engineers with a seamless way to identify differences, synchronize settings, and maintain consistency across development, staging, and production configurations."
-                                               TextWrapping="Wrap"
-                                               Margin="0,0,0,15"
-                                               FontSize="11"
-                                               LineHeight="16" />
-                                    
-                                    <TextBlock Text="Key Features" 
-                                               FontWeight="Bold" 
-                                               FontSize="12"
-                                               Margin="0,0,0,10"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Text="• Side-by-side configuration comparison with detailed diff view" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="• Native Azure App Configuration integration" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="• Find and replace values across configs with bulk operations" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="• Copy settings between instances with metadata preservation" TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="• Customizable application settings and preferences" TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
-
-                                    <TextBlock Text="System Requirements" 
-                                               FontWeight="Bold" 
-                                               FontSize="12"
-                                               Margin="0,0,0,10"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Text="• Windows 10 or later" TextWrapping="Wrap" Margin="0,0,0,3" FontSize="11" />
-                                    <TextBlock Text="• .NET 10.0 Runtime" TextWrapping="Wrap" Margin="0,0,0,3" FontSize="11" />
-                                    <TextBlock Text="• Azure subscription (for configuration operations)" TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
-
-                                    <TextBlock Text="Getting Started" 
-                                               FontWeight="Bold" 
-                                               FontSize="12"
-                                               Margin="0,0,0,10"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Text="1. Configure your Azure credentials using the Azure CLI or environment variables"
-                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="2. Enter Azure App Configuration endpoints in the application"
-                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="3. Compare, edit, or synchronize configurations as needed"
-                                               TextWrapping="Wrap" Margin="0,0,0,15" FontSize="11" />
-
-                                    <TextBlock Text="Support &amp; Resources" 
-                                               FontWeight="Bold" 
-                                               FontSize="12"
-                                               Margin="0,0,0,10"
-                                               Foreground="#1F1F1F" />
-                                    
-                                    <TextBlock Text="Documentation: Available at the project repository"
-                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="Report Issues: Submit feedback and bug reports on GitHub"
-                                               TextWrapping="Wrap" Margin="0,0,0,5" FontSize="11" />
-                                    <TextBlock Text="License: MIT License - See LICENSE file for details"
-                                               TextWrapping="Wrap" Margin="0,0,0,20" FontSize="11" />
-
-                                    <TextBlock Text="Developed with ❤️ using .NET 10.0 and WPF"
-                                               TextWrapping="Wrap" 
-                                               FontSize="10"
-                                               Foreground="#999999"
-                                               TextAlignment="Center" />
+                                               Margin="0,0,0,2" FontSize="12"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                                    <TextBlock Name="PopupBuildDateTextBlock"
+                                               Text="Build Date: -"
+                                               Margin="0,0,0,16" FontSize="11"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"/>
+                                    <TextBlock Text="(C) 2026 All Rights Reserved"
+                                               Margin="0,0,0,16" FontSize="10"
+                                               Foreground="{StaticResource FluentTextSecondaryBrush}"/>
                                 </StackPanel>
                             </ScrollViewer>
                         </TabItem>
@@ -593,5 +930,94 @@
                 </StackPanel>
             </Border>
         </Grid>
-    </DockPanel>
+
+        <!-- CONNECTION DIALOG OVERLAY -->
+        <Grid Grid.Row="0" Grid.RowSpan="3"
+              Name="ConnectionDialogOverlay"
+              Background="#80000000"
+              Visibility="Hidden"
+              Panel.ZIndex="200">
+            <Border Background="White"
+                    BorderBrush="{StaticResource FluentBorderBrush}"
+                    BorderThickness="1" CornerRadius="8"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    MinWidth="480" MaxWidth="520">
+                <StackPanel>
+                    <Grid Background="{StaticResource AzureBlueBrush}" Height="52">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="24,0">
+                            <Image Source="{StaticResource AppIconDrawing}"
+                                   Width="22" Height="22" Margin="0,0,10,0"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <TextBlock Text="Connect to Azure App Configuration"
+                                       FontSize="14" FontWeight="SemiBold"
+                                       Foreground="White" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                    <StackPanel Margin="32,24,32,28">
+                        <TextBlock Text="Enter your Azure App Configuration endpoint and choose an authentication method."
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                   FontSize="12" Margin="0,0,0,20"/>
+                        <TextBlock Text="Endpoint URL *" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                   Margin="0,0,0,6"/>
+                        <TextBox Name="DialogConnectionEndpointTextBox"
+                                 Padding="10,8" Background="White"
+                                 BorderBrush="{StaticResource FluentBorderBrush}"
+                                 FontSize="12" Margin="0,0,0,16"/>
+                        <TextBlock Text="Authentication Method" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                   Margin="0,0,0,6"/>
+                        <ComboBox Name="DialogAuthMethodComboBox"
+                                  SelectedIndex="0" HorizontalAlignment="Left"
+                                  MinWidth="260" Margin="0,0,0,16"
+                                  SelectionChanged="DialogAuthMethodComboBox_SelectionChanged">
+                            <ComboBoxItem Tag="DefaultAzureCredential">Default Azure Credential</ComboBoxItem>
+                            <ComboBoxItem Tag="ServicePrincipal">Service Principal</ComboBoxItem>
+                            <ComboBoxItem Tag="ManagedIdentity">Managed Identity</ComboBoxItem>
+                        </ComboBox>
+                        <StackPanel Name="DialogServicePrincipalPanel" Visibility="Collapsed">
+                            <TextBlock Text="Tenant ID *" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <TextBox Name="DialogTenantIdTextBox"
+                                     Padding="10,8" Background="White"
+                                     BorderBrush="{StaticResource FluentBorderBrush}"
+                                     FontSize="12" Margin="0,0,0,12"/>
+                            <TextBlock Text="Client ID *" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <TextBox Name="DialogClientIdTextBox"
+                                     Padding="10,8" Background="White"
+                                     BorderBrush="{StaticResource FluentBorderBrush}"
+                                     FontSize="12" Margin="0,0,0,12"/>
+                            <TextBlock Text="Client Secret" FontWeight="SemiBold"
+                                       Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                       Margin="0,0,0,6"/>
+                            <PasswordBox Name="DialogClientSecretBox"
+                                         Padding="10,8" Background="White"
+                                         BorderBrush="{StaticResource FluentBorderBrush}"
+                                         FontSize="12" Margin="0,0,0,12"/>
+                        </StackPanel>
+                        <TextBlock Text="Subscription ID (optional)" FontWeight="SemiBold"
+                                   Foreground="{StaticResource FluentTextSecondaryBrush}"
+                                   Margin="0,0,0,6"/>
+                        <TextBox Name="DialogSubscriptionIdTextBox"
+                                 Padding="10,8" Background="White"
+                                 BorderBrush="{StaticResource FluentBorderBrush}"
+                                 FontSize="12" Margin="0,0,0,24"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Name="ConnectionDialogSkipButton" Content="Skip for now"
+                                    Style="{StaticResource FluentSubtleButtonStyle}"
+                                    Padding="16,8" Margin="0,0,8,0"/>
+                            <Button Name="ConnectionDialogConnectButton" Content="Connect"
+                                    Style="{StaticResource FluentPrimaryButtonStyle}"
+                                    Padding="20,8"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+    </Grid>
 </Window>
