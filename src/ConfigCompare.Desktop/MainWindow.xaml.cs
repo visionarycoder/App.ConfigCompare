@@ -7,6 +7,7 @@ using ConfigCompare.AppConfig;
 using ConfigCompare.AppConfig.Resources;
 using ConfigCompare.Settings;
 using ConfigCompare.Settings.Resources;
+using ConfigCompare.Desktop.Security;
 using ConfigCompare.Desktop.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -210,6 +211,9 @@ public partial class MainWindow : Window
             DialogTenantIdTextBox.Text = connection.TenantId;
         if (!string.IsNullOrWhiteSpace(connection.ClientId))
             DialogClientIdTextBox.Text = connection.ClientId;
+        var dialogDecryptedSecret = CredentialProtection.Unprotect(connection.ClientSecret);
+        if (!string.IsNullOrWhiteSpace(dialogDecryptedSecret))
+            DialogClientSecretBox.Password = dialogDecryptedSecret;
         if (!string.IsNullOrWhiteSpace(connection.SubscriptionId))
             DialogSubscriptionIdTextBox.Text = connection.SubscriptionId;
     }
@@ -251,7 +255,7 @@ public partial class MainWindow : Window
             string.IsNullOrWhiteSpace(DialogTenantIdTextBox.Text)      ? null : DialogTenantIdTextBox.Text.Trim(),
             string.IsNullOrWhiteSpace(DialogSubscriptionIdTextBox.Text) ? null : DialogSubscriptionIdTextBox.Text.Trim(),
             string.IsNullOrWhiteSpace(DialogClientIdTextBox.Text)       ? null : DialogClientIdTextBox.Text.Trim(),
-            string.IsNullOrWhiteSpace(DialogClientSecretBox.Password)   ? null : DialogClientSecretBox.Password);
+            CredentialProtection.Protect(string.IsNullOrWhiteSpace(DialogClientSecretBox.Password) ? null : DialogClientSecretBox.Password));
 
         await PersistConnectionAsync(connection);
         HideConnectionDialog();
@@ -275,6 +279,9 @@ public partial class MainWindow : Window
             PopupTenantIdTextBox.Text = connection.TenantId;
         if (!string.IsNullOrWhiteSpace(connection.ClientId))
             PopupClientIdTextBox.Text = connection.ClientId;
+        var popupDecryptedSecret = CredentialProtection.Unprotect(connection.ClientSecret);
+        if (!string.IsNullOrWhiteSpace(popupDecryptedSecret))
+            PopupClientSecretBox.Password = popupDecryptedSecret;
         if (!string.IsNullOrWhiteSpace(connection.SubscriptionId))
             PopupSubscriptionIdTextBox.Text = connection.SubscriptionId;
     }
@@ -316,7 +323,7 @@ public partial class MainWindow : Window
             string.IsNullOrWhiteSpace(PopupTenantIdTextBox.Text)       ? null : PopupTenantIdTextBox.Text.Trim(),
             string.IsNullOrWhiteSpace(PopupSubscriptionIdTextBox.Text)  ? null : PopupSubscriptionIdTextBox.Text.Trim(),
             string.IsNullOrWhiteSpace(PopupClientIdTextBox.Text)        ? null : PopupClientIdTextBox.Text.Trim(),
-            string.IsNullOrWhiteSpace(PopupClientSecretBox.Password)    ? null : PopupClientSecretBox.Password);
+            CredentialProtection.Protect(string.IsNullOrWhiteSpace(PopupClientSecretBox.Password) ? null : PopupClientSecretBox.Password));
 
         await PersistConnectionAsync(connection);
         CloseSettingsPopup();

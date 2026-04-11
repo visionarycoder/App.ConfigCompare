@@ -8,7 +8,7 @@ namespace ConfigCompare.Settings.Resources;
 /// <param name="TenantId">Azure AD tenant ID. Required for <see cref="AuthMethod.ServicePrincipal"/>.</param>
 /// <param name="SubscriptionId">Azure subscription ID (optional; used for resource group listing).</param>
 /// <param name="ClientId">Service principal or managed identity client ID.</param>
-/// <param name="ClientSecret">Service principal client secret. Should be stored encrypted in production.</param>
+/// <param name="ClientSecret">Service principal client secret stored as a DPAPI-encrypted Base64 string. Use <c>CredentialProtection.Protect/Unprotect</c> (Desktop layer) for encryption/decryption.</param>
 public record AzureConnectionDto(
     string Endpoint,
     AuthMethod AuthMethod,
