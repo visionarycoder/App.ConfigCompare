@@ -16,6 +16,7 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
     <PackageReference Include="CommunityToolkit.Diagnostics" Version="8.4.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.WindowsDesktop.App.Runtime.win-x64" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
