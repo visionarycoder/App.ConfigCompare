@@ -1,32 +1,32 @@
 # Configuration Comparison Tool
 
-A comprehensive WPF desktop application for managing, comparing, and synchronizing Azure App Configuration settings with advanced productivity features.
+A WinUI 3 desktop application for managing, comparing, and synchronizing Azure App Configuration settings.
 
 ## 🚀 Features
 
 ### Core Features
 
-- **Configuration Comparison**: Side-by-side comparison with line-by-line difference detection
-- **Application Settings**: Customizable theme, refresh behavior, and notifications
+- **Configurations**: Load and browse key-value pairs from Azure App Configuration endpoints
+- **Configuration Comparison**: Side-by-side comparison showing keys only in left, keys in both, and keys only in right
 - **Edit & Commit**: Create and update configurations directly in Azure App Configuration
-- **Find & Replace**: Bulk find and replace values across multiple configurations
+- **Find & Replace**: Bulk find and replace values across a configuration store
 - **Copy Settings**: Synchronize configurations between App Configuration instances
-- **Professional UI**: Tab-based navigation with intuitive user interface
+- **Modern UI**: NavigationView with left pane navigation
 
 ### Technical Highlights
 
 - ✅ **Cloud-Native**: Direct integration with Azure App Configuration service
 - ✅ **Secure**: DefaultAzureCredential authentication support
-- ✅ **Modern Stack**: Built on .NET 10.0 with WPF and MVVM patterns
+- ✅ **Modern Stack**: Built on .NET 10.0 with WinUI 3 (Windows App SDK) and MVVM patterns
 - ✅ **Well-Tested**: 37 total tests (32 unit + 5 integration), 100% passing
 - ✅ **Enterprise-Ready**: Comprehensive error handling and validation
 
 ## 📋 System Requirements
 
 - .NET 10.0 SDK
-- Windows OS (WPF application)
+- Windows 10 or later (WinUI 3 application)
 - Azure subscription with App Configuration resource
-- Azure credentials configured (device flow, managed identity, service principal, etc.)
+- Azure credentials configured (Azure CLI, managed identity, service principal, etc.)
 
 ## 🛠️ Building
 
@@ -49,7 +49,7 @@ dotnet run --project src/ConfigCompare.Desktop/ConfigCompare.Desktop.csproj
 
 ```txt
 src/
-├── ConfigCompare.Desktop/       # WPF UI Application
+├── ConfigCompare.Desktop/       # WinUI 3 UI Application
 ├── ConfigCompare.AppConfig/     # Azure App Configuration Service
 ├── ConfigCompare.AzureIdentity/ # Azure Authentication
 ├── ConfigCompare.ResourceGroup/ # Resource Group Operations
@@ -58,58 +58,55 @@ src/
 
 tests/
 ├── unit/                        # Unit Tests (32 tests)
-└── integration/                 # Integration Tests
+└── integration/                 # Integration Tests (5 tests)
 ```
 
 ## 🎯 Quick Start
 
 1. **Launch Application**: Run the desktop application
 2. **Authenticate**: Use DefaultAzureCredential (automatically uses available credentials)
-3. **Select Tab**: Choose operation from six available tabs
+3. **Select Page**: Choose an operation from the left navigation pane
 4. **Enter Endpoint**: Provide Azure App Configuration endpoint URL
 5. **Perform Operation**: Execute comparison, edit, find/replace, or copy
 
-## 🔑 Available Operations
+## 🔑 Available Pages
 
-### 1. Comparison Tab
+### 1. Configurations Page
 
-- Compare two configuration texts
-- Get line-by-line differences
-- See total difference count
+- Add one or more Azure App Configuration endpoint URLs
+- Browse and view the key-value pairs loaded from each endpoint
+- Remove endpoints from the list
 
-### 2. Settings Tab
+### 2. Compare Page
 
-- Select application theme
-- Configure refresh behavior
-- Enable/disable notifications
-- Save or reset to defaults
+- Select two loaded configurations from dropdown menus
+- View a three-column diff: keys only in left, keys in both, keys only in right
 
-### 3. Edit Configuration Tab
+### 3. Edit Config Page
 
 - Create new configurations
 - Update existing configurations
 - Add optional labels
 - Commit directly to Azure
 
-### 4. Find & Replace Tab
+### 4. Find & Replace Page
 
-- Search for values across configs
+- Search for values across a config store
 - Replace with new values
 - View affected configuration keys
 - See replacement count
 
-### 5. Copy Settings Tab
+### 5. Copy Settings Page
 
 - Sync from source to target instance
 - Preserve all metadata
 - Validation to prevent source/target confusion
 - List all copied keys
 
-### 6. About Tab
+### 6. Settings Page
 
-- View application version
-- See feature overview
-- Review copyright information
+- Select application theme (Light, Dark, System Default)
+- View application version and about information
 
 ## 🔐 Authentication
 
@@ -129,7 +126,7 @@ No explicit configuration needed!
 
 - **AppConfigService**: Provides CRUD operations and advanced features on App Configuration
 - **AuthService**: Handles Azure authentication
-- **ResourceGroupService**: Discovers resource groups and services
+- **ResourceGroupService**: Discovers resource groups and App Configuration/Key Vault endpoints
 - **SessionService**: Manages user sessions
 - **SettingsService**: Manages application settings
 
@@ -160,10 +157,15 @@ dotnet test --verbosity=detailed
 
 ### NuGet Packages
 
+- `Microsoft.WindowsAppSDK` v1.6.250228002
 - `Azure.Data.AppConfiguration` v1.4.1
 - `Azure.Identity` v1.13.2
+- `Azure.ResourceManager` v1.14.0
+- `Azure.ResourceManager.AppConfiguration` v1.3.1
+- `Azure.ResourceManager.KeyVault` v1.4.0
 - `CommunityToolkit.Mvvm` v8.3.2
 - `CommunityToolkit.Diagnostics` v8.4.0
+- `Microsoft.Data.Sqlite` v10.0.0
 - `Microsoft.Extensions.DependencyInjection` v10.0.0
 
 ## 🤝 Contributing
@@ -188,8 +190,9 @@ For issues, questions, or suggestions, please create an issue on GitHub.
 
 ### v1.0.0 (Latest)
 
-- ✅ WPF desktop application with tab-based UI
-- ✅ Configuration comparison engine
+- ✅ WinUI 3 desktop application with NavigationView-based UI
+- ✅ Configurations page to load and browse App Configuration endpoints
+- ✅ Configuration comparison engine (three-column diff view)
 - ✅ AppConfig service with CRUD operations
 - ✅ Find and replace functionality
 - ✅ Copy settings between instances
