@@ -16,16 +16,10 @@ public partial class App : Application
     public static Window? MainWindowInstance { get; private set; }
 
     public static string SettingsFilePath { get; } =
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "ConfigCompare",
-            "settings.json");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ConfigCompare", "settings.json");
 
     public static string SessionDbPath { get; } =
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "ConfigCompare",
-            "sessions.db");
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ConfigCompare", "sessions.db");
 
     public App()
     {
