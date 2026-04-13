@@ -17,14 +17,14 @@ dotnet run --project src/ConfigCompare.Desktop --configuration Release
 
 ## Navigation Map
 
-| Tab | Purpose | Key Actions |
+| Page | Purpose | Key Actions |
 | --- | --- | --- |
-| **Resource Groups** | Browse Azure subscriptions | Select RG, view resources |
-| **App Config** | Manage configurations | Create, read, update, delete entries |
-| **Key Vault** | Manage secrets | View, rotate, access secrets |
-| **Comparison** | Compare configs | Side-by-side diff view |
-| **PIM** | Activate roles | Request access, set duration |
-| **Settings** ⚙️ | Preferences | Theme, auto-refresh, about |
+| **Configurations** | Load App Config endpoints | Add endpoint, view key-value pairs, remove |
+| **Compare** | Compare two loaded configs | Select left/right, view three-column diff |
+| **Edit Config** | Create/update configurations | Enter endpoint, key, value, label, save |
+| **Find & Replace** | Bulk value replacement | Enter endpoint, find/replace terms, execute |
+| **Copy Settings** | Sync between instances | Enter source/target endpoints, copy |
+| **Settings** ⚙️ | Preferences & about | Theme (System/Light/Dark), app version |
 
 ---
 
@@ -32,7 +32,6 @@ dotnet run --project src/ConfigCompare.Desktop --configuration Release
 
 | Action | Shortcut | Status |
 | --- | --- | --- |
-| Close Settings Popup | Esc | 🚀 Future |
 | Find & Replace | Ctrl+H | ✅ Implemented |
 | Copy Setting | Ctrl+C | ✅ Implemented |
 | Paste Setting | Ctrl+V | ✅ Implemented |
@@ -42,41 +41,34 @@ dotnet run --project src/ConfigCompare.Desktop --configuration Release
 ## Common Tasks
 
 ### View Current User
-1. Check **footer** of main window
-2. Displays: "[User Display Name] (UPN)"
-3. Updated when authentication refreshes
+1. Check the **title bar** (top right of the main window)
+2. Displays the signed-in user's display name
+3. Shows "Not signed in" if authentication fails
 
 ### Change Theme
-1. Click ⚙️ icon (Settings)
-2. Select theme: Light, Dark, System Default
-3. Click Save
-4. Theme applies immediately
+1. Click ⚙️ icon (Settings) at the bottom of the navigation pane
+2. Select theme: System default, Light, or Dark
+3. Theme applies immediately — no save button required
 
 ### Compare Two Configs
-1. Click **Comparison** tab
-2. Select "Source" App Config or Key Vault
-3. Select "Target" App Config or Key Vault
-4. View color-coded differences:
-   - 🟢 Green: Only in Target
-   - 🔴 Red: Only in Source
-   - 🟡 Yellow: Changed values
-   - ⚪ White: Identical
+1. Go to the **Configurations** page and add both endpoints
+2. Click **Compare** in the navigation pane
+3. Select left and right configurations from the dropdowns
+4. Click "Compare" to view the three-column diff:
+   - 🔴 Red: Only in Left
+   - 🟢 Green: In Both
+   - 🔵 Blue: Only in Right
 
-### Find All Occurrences
-1. Click **App Config** or **Key Vault** tab
-2. Press Ctrl+H or use Find menu
-3. Enter search term
-4. All matches highlighted
-5. Click "Replace All" (or individual replace)
+### Find and Replace Values
+1. Click **Find & Replace** in the navigation pane
+2. Enter the App Configuration endpoint URL
+3. Enter the value to find and its replacement
+4. Click "Find & Replace" — results show replacement count and affected keys
 
-### Activate a PIM Role
-1. Click **PIM** tab
-2. View "Eligible Roles" section
-3. Click "Activate" button on desired role
-4. Enter justification (why needed)
-5. Select duration (e.g., 4 hours)
-6. Click "Submit"
-7. Status updates when approved
+### Copy Settings Between Stores
+1. Click **Copy Settings** in the navigation pane
+2. Enter source and target endpoint URLs
+3. Click "Copy Settings" — results show copied key count and list
 
 ---
 
@@ -116,10 +108,6 @@ az group show --name "rg-name"           # RG details
 # App Configuration
 az appconfig list --resource-group "rg"  # List stores
 az appconfig kv list --name "store-name" # List entries
-
-# Key Vault
-az keyvault list --resource-group "rg"   # List vaults
-az keyvault secret list --vault-name "name"  # List secrets
 ```
 
 ---
@@ -167,9 +155,9 @@ $env:AZURE_TEST_RESOURCE_GROUP = "test-rg-name"
 
 ## Performance Tips
 
-1. **Faster Comparisons**: Use filters to reduce dataset size
-2. **Batch Operations**: Use Find & Replace for bulk updates
-3. **Cool Credentials**: DefaultAzureCredential caches tokens (minimal auth overhead)
+1. **Faster Comparisons**: Load only the endpoints you need to compare
+2. **Batch Operations**: Use Find & Replace for bulk value updates
+3. **Cached Credentials**: DefaultAzureCredential caches tokens (minimal auth overhead)
 4. **Local Sessions**: SQLite cache makes session restore instant
 5. **Network**: Connections use Azure SDK connection pooling
 
@@ -182,12 +170,16 @@ src/
 ├── ConfigCompare.AzureIdentity/    → Authentication & tokens
 ├── ConfigCompare.ResourceGroup/     → Azure resource discovery
 ├── ConfigCompare.AppConfig/         → App Configuration CRUD
-├── ConfigCompare.KeyVault/          → Key Vault secrets access
-├── ConfigCompare.Comparison/        → Diff engine (pure logic)
-├── ConfigCompare.Settings/          → Local preferences
+├── ConfigCompare.Settings/          → Local preferences (JSON)
 ├── ConfigCompare.Session/           → Session persistence (SQLite)
-├── ConfigCompare.Pim/               → PIM role activation
-└── ConfigCompare.Desktop/           → WPF UI application
+└── ConfigCompare.Desktop/           → WinUI 3 UI application
+    └── Pages/
+        ├── ConfigurationsPage       → Load & browse endpoints
+        ├── ComparePage              → Three-column diff
+        ├── EditConfigPage           → Create/update configs
+        ├── FindReplacePage          → Bulk find & replace
+        ├── CopySettingsPage         → Cross-instance copy
+        └── SettingsPage             → Theme & about
 
 tests/
 ├── unit/                            → 32 unit tests (fast, local)

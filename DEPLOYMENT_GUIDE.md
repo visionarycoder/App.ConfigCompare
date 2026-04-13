@@ -74,46 +74,38 @@ Automatically used when running in Azure environments.
 
 ## Feature Usage
 
-### 1. View Resource Groups
+### 1. Load Configurations
 1. Launch application
-2. Click "Resource Groups" tab
-3. Application auto-discovers connected subscription
-4. Browse available resource groups
+2. The **Configurations** page opens automatically
+3. Enter an Azure App Configuration endpoint URL (e.g., `https://your-store.azconfig.io`)
+4. Click "Add Configuration" — key-value pairs load below
 
-### 2. Manage App Configuration
-1. Click "App Config" tab
-2. Select resource group
-3. Choose App Configuration store
-4. View/Edit configuration entries
-5. Use Find & Replace for bulk operations
+### 2. Compare Configurations
+1. Add at least two endpoints on the **Configurations** page
+2. Click **Compare** in the navigation pane
+3. Select left and right configurations from dropdowns
+4. Click "Compare" to view the three-column diff (Only in Left / In Both / Only in Right)
 
-### 3. Manage Key Vault Secrets
-1. Click "Key Vault" tab
-2. Select resource group
-3. Choose Key Vault
-4. View/Edit secret values
-5. Automatic secret value masking in logs
+### 3. Edit a Configuration Entry
+1. Click **Edit Config** in the navigation pane
+2. Enter the endpoint, key, value, and optional label
+3. Click "Save" to commit the change directly to Azure
 
-### 4. Compare Configurations
-1. Click "Comparison" tab
-2. Select source App Config or Key Vault
-3. Select target App Config or Key Vault
-4. View side-by-side comparison
-5. Color-coded diff view shows changes
+### 4. Find and Replace Values
+1. Click **Find & Replace** in the navigation pane
+2. Enter the endpoint URL, the value to find, and the replacement value
+3. Click "Find & Replace" — results show replacement count and affected keys
 
-### 5. Activate PIM Roles
-1. Click "PIM" tab
-2. View eligible roles
-3. Click "Activate" on desired role
-4. Provide justification and duration
-5. Activation request submitted to Azure
+### 5. Copy Settings Between Stores
+1. Click **Copy Settings** in the navigation pane
+2. Enter source and target endpoint URLs
+3. Click "Copy Settings" — results show how many keys were copied
 
 ### 6. Customize Settings
-1. Click ⚙️ (Settings) icon at bottom of navbar
-2. Choose theme: Light, Dark, or System Default
-3. Toggle preferences (auto-refresh, notifications)
-4. Click "Save" to persist changes
-5. View "About" tab for application version and information
+1. Click ⚙️ (Settings) icon at the bottom of the navigation pane
+2. Choose theme: System Default, Light, or Dark
+3. Theme applies immediately — no save required
+4. The About section shows the application version
 
 ---
 
@@ -156,13 +148,14 @@ dotnet publish --configuration Release --output ./publish
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────┐
-│   ConfigCompare.Desktop (WPF)   │
-│   - MainWindow.xaml             │
-│   - MVVM ViewModels             │
-│   - Theme Service               │
-│   - Session Management          │
-└────────────────┬────────────────┘
+┌───────────────────────────────────────┐
+│   ConfigCompare.Desktop (WinUI 3)     │
+│   - MainWindow.xaml (NavigationView)  │
+│   - Pages (Configurations, Compare,  │
+│     EditConfig, FindReplace,          │
+│     CopySettings, Settings)           │
+│   - MVVM ViewModels                   │
+└────────────────┬──────────────────────┘
                  │
       ┌──────────┴──────────┐
       ▼                     ▼
@@ -172,9 +165,8 @@ dotnet publish --configuration Release --output ./publish
 │ IAuthService     │  │ SQLite Sessions  │
 │ IResourceGroup   │  │ Local Settings   │
 │ IAppConfig       │  │ JSON Prefs       │
-│ IKeyVault        │  │                  │
-│ IComparison      │  │                  │
-│ IPim             │  │                  │
+│ ISettings        │  │                  │
+│ ISession         │  │                  │
 └────────┬─────────┘  └──────────────────┘
          │
          ▼
@@ -183,9 +175,9 @@ dotnet publish --configuration Release --output ./publish
 ├──────────────────────────────────────┤
 │ Azure.Identity                       │
 │ Azure.Data.AppConfiguration          │
-│ Azure.Security.KeyVault.Secrets      │
 │ Azure.ResourceManager                │
-│ Microsoft.Graph (PIM)                │
+│ Azure.ResourceManager.AppConfiguration│
+│ Azure.ResourceManager.KeyVault       │
 └──────────────────────────────────────┘
          │
          ▼
@@ -195,8 +187,6 @@ dotnet publish --configuration Release --output ./publish
 │ Azure AD (Authentication)            │
 │ Azure Resource Manager               │
 │ Azure App Configuration              │
-│ Azure Key Vault                      │
-│ Microsoft Graph (PIM)                │
 └──────────────────────────────────────┘
 ```
 
@@ -317,13 +307,13 @@ ENTRYPOINT ["ConfigCompare.Desktop.exe"]
 ## Version History
 
 ### v1.0.0 (Current)
-- ✅ WPF desktop application
+- ✅ WinUI 3 desktop application (Windows App SDK)
 - ✅ Azure App Configuration management
-- ✅ Azure Key Vault secrets management
-- ✅ Configuration comparison engine
-- ✅ PIM role activation
-- ✅ Settings and preferences
-- ✅ Session persistence
+- ✅ Configuration comparison engine (three-column diff)
+- ✅ Settings and preferences (theme)
+- ✅ Session persistence (SQLite)
+- ✅ Find and replace functionality
+- ✅ Copy settings between instances
 - ✅ 37 comprehensive tests
 
 ### Future Releases

@@ -39,13 +39,12 @@ dotnet run --project src/ConfigCompare.Desktop --configuration Release
 ## Features Included
 
 - ✅ Azure App Configuration management
-- ✅ Azure Key Vault secret management
-- ✅ Configuration comparison (side-by-side diff)
-- ✅ PIM role activation
-- ✅ Settings and preferences
+- ✅ Configuration comparison (three-column key diff)
+- ✅ Settings and preferences (theme selection)
 - ✅ Session persistence
 - ✅ Theme support (Light/Dark/System)
 - ✅ Find and replace functionality
+- ✅ Copy settings between instances
 
 ## Quality Metrics
 
@@ -67,9 +66,8 @@ dotnet run --project src/ConfigCompare.Desktop --configuration Release
 2. **Launch**: Run `ConfigCompare.Desktop.exe`
 
 3. **Configure**: 
-   - Select Resource Group
-   - Choose App Configuration or Key Vault
-   - Start managing configurations
+   - Enter an Azure App Configuration endpoint URL on the Configurations page
+   - Start browsing, comparing, and managing configurations
 
 ## Support
 
